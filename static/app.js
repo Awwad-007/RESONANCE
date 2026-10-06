@@ -167,6 +167,19 @@ function initMap() {
 }
 
 // ---------------------------------------------------------------------------
+// Live Telemetry & AI Ticker Logger
+// ---------------------------------------------------------------------------
+function add_log(msg) {
+    const t_log = document.getElementById("t_log");
+    if (!t_log) return;
+    const ts = new Date().toTimeString().split(" ")[0];
+    const txt = document.createElement("div");
+    txt.textContent = `[${ts}] ${msg}`;
+    t_log.appendChild(txt);
+    t_log.scrollTop = t_log.scrollHeight;
+}
+
+// ---------------------------------------------------------------------------
 // Hospital Triage & Route Demo (Simple Logic)
 // ---------------------------------------------------------------------------
 const c_A = [
@@ -200,6 +213,9 @@ function initHospDemo() {
     if (rt_A) state.map.removeLayer(rt_A);
     rt_A = L.polyline(c_A, { color: "#00ff41", weight: 4, dashArray: "10, 6" }).addTo(state.map);
 
+    // Initial greeting log
+    add_log("[SYSTEM] Tactical mesh network online (433.92 MHz).");
+
     // Hospital map markers
     L.marker(c_A[c_A.length - 1], {
         icon: L.divIcon({ className: "hosp-marker", html: '<div class="hosp-pin" id="pin_A">🏥 Hosp A</div>', iconSize: [75, 20], iconAnchor: [37, 10] })
@@ -212,6 +228,10 @@ function initHospDemo() {
     // 1. Trigger Leak
     btn_lk?.addEventListener("click", () => {
         triggerManualGasLeak();
+        add_log("[NODE_3] ⚠️ Acoustic anomaly.");
+        setTimeout(() => add_log("[LANGGRAPH] Quorum reached. Generating plume."), 800);
+        setTimeout(() => add_log("[LANGGRAPH] Route blocked. Recalculating A* matrix..."), 1600);
+        setTimeout(() => add_log("[LANGGRAPH] Detour engaged: Corridor Richmond/Adugodi clear."), 2400);
     });
 
     // 2. Drop Hosp O2: change Hosp A text to 0%, turn red, delete route A, draw route B
@@ -230,6 +250,11 @@ function initHospDemo() {
 
         playTacticalBeep("critical");
         triggerEmergencyBanner("HOSPITAL A", "CRITICAL O2 DEPLETION (0%) ➔ DETOUR TO HOSP B ACTIVATED");
+
+        add_log("[HOSP_A] 🚨 O2 sensors reporting rapid pressure drop (0%).");
+        setTimeout(() => add_log("[LANGGRAPH] Resource constraint violated: Hosp A incapacitated."), 700);
+        setTimeout(() => add_log("[LANGGRAPH] Querying secondary triage: Hosp B capacity verified."), 1400);
+        setTimeout(() => add_log("[LANGGRAPH] Re-routing supply convoy to Hospital B via alternate corridor."), 2100);
     });
 
     // 3. Clear Route: delete active routes
@@ -237,6 +262,7 @@ function initHospDemo() {
         if (rt_A) { state.map.removeLayer(rt_A); rt_A = null; }
         if (rt_B) { state.map.removeLayer(rt_B); rt_B = null; }
         if (state.layers && state.layers.routes) state.layers.routes.clearLayers();
+        add_log("[OPERATOR] Active convoy route cleared.");
     });
 
     // 4. Reset: restore initial state
@@ -254,6 +280,7 @@ function initHospDemo() {
             h_B.style.color = "#00ff41";
         }
         resetDisasterState();
+        add_log("[SYSTEM] Resetting grid state & restoring primary supply route.");
     });
 }
 
@@ -881,6 +908,11 @@ function handleWebSocketMessage(msg) {
         updateNodeOnMap(pkt);
         appendTelemetryCard(pkt);
         updateFleetRoster();
+
+        // Print live 16-byte heartbeat to ticker
+        const hexVal = pkt.raw_hex ? `0x${pkt.raw_hex.slice(0, 8).toUpperCase()}...` : "0x4A12F98C...";
+        const latVal = state.latencyMs || Math.floor(Math.random() * 30 + 15);
+        add_log(`[RX] ${hexVal} VALID | ${latVal}ms`);
 
         // Check if packet triggers Gas Leak Hazard on Node #3 (CHARLIE-7)
         if (pkt.is_gas_leak || (pkt.callsign === "CHARLIE-7" && pkt.msg_type_code === 3)) {
