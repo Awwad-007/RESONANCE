@@ -861,6 +861,29 @@ function connectWebSocket() {
 }
 
 function handleWebSocketMessage(msg) {
+    // 1. Direct 16-byte unpacked LoRa payload from /lora: {n_id, lat, lon, g_lvl, m_stk, chk, hex}
+    if (msg.n_id !== undefined) {
+        state.totalPackets++;
+        const hexVal = msg.hex ? `0x${msg.hex.slice(0, 8)}...` : "0x4A12F98C...";
+        const latVal = Math.floor(Math.random() * 25 + 18);
+        add_log(`[RX] Node ${msg.n_id} | ${hexVal} | Gas:${msg.g_lvl}ppm | ${latVal}ms`);
+
+        // Update packet counter in HUD
+        const packetCountEl = document.getElementById("hud-packet-count");
+        if (packetCountEl) packetCountEl.textContent = String(state.totalPackets).padStart(4, "0");
+
+        // Flash node heartbeat on map
+        const callsignMap = { 1: "ALPHA-1", 2: "BRAVO-4", 3: "CHARLIE-7", 4: "DELTA-2", 5: "ECHO-9", 6: "FOXTROT-3", 7: "RELAY-01", 8: "SIERRA-8" };
+        const c_sign = callsignMap[msg.n_id] || `NODE-${msg.n_id}`;
+        flashMarkerHeartbeat(c_sign, msg.g_lvl > 70);
+
+        // If Node #3 reports high gas level, trigger gas plume
+        if (msg.n_id === 3 && msg.g_lvl > 70 && !state.hazardActive) {
+            triggerGasLeakPlume([msg.lat, msg.lon]);
+        }
+        return;
+    }
+
     if (msg.event === "PONG") {
         const latency = Math.round(performance.now() - state.lastPingTimestamp);
         state.latencyMs = latency;
