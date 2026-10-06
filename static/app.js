@@ -249,48 +249,62 @@ function initHospDemo() {
 
     h_mk = [mk_A, mk_B];
 
-    // 3. Trigger Leak: Draw red hazard circle over node #3, delete current route, draw detour bypassing circle
+    // 3. Trigger Leak: Synchronized AI thinking delay sequence
     btn_lk?.addEventListener("click", () => {
+        // Step 0 (Instant): Draw pulsing red hazard circle & delete old route line
         if (hz_c) state.map.removeLayer(hz_c);
         hz_c = L.circle(nds[2], {
-            radius: 750,
+            radius: 400,
             color: "#ff3344",
             fillColor: "#ff3344",
             fillOpacity: 0.35,
             weight: 2,
-            dashArray: "6, 6"
-        }).addTo(state.map).bindPopup("<b>⚠️ TOXIC GAS PLUME HAZARD</b><br>Concentration: >850 PPM (LETHAL)");
+            dashArray: "6, 6",
+            className: "gas-hazard-pulse"
+        }).addTo(state.map).bindPopup("<b>⚠️ TOXIC GAS PLUME HAZARD</b><br>Node #3 (Domlur) | Radius: 400m");
 
         if (rt_A) { state.map.removeLayer(rt_A); rt_A = null; }
-        if (rt_B) state.map.removeLayer(rt_B);
-        rt_B = L.polyline(c_B, { color: "#00f0ff", weight: 4, dashArray: "10, 6" }).addTo(state.map);
+        if (rt_B) { state.map.removeLayer(rt_B); rt_B = null; }
 
         playTacticalBeep("critical");
-        triggerEmergencyBanner("NODE #3 (DOMLUR)", "CRITICAL GAS LEAK DETECTED ➔ AI RECALCULATED DETOUR ACTIVE");
+        triggerEmergencyBanner("NODE #3 (DOMLUR)", "CRITICAL GAS LEAK DETECTED ➔ AI AGENTS CALCULATING DETOUR");
+        add_log("[LANGGRAPH: Plume Agent] Toxic gas detected at Node 3. Radius: 400m.");
 
-        add_log("[NODE_3] ⚠️ Acoustic anomaly detected (Domlur).");
-        setTimeout(() => add_log("[LANGGRAPH] Quorum reached. Generating red hazard plume."), 700);
-        setTimeout(() => add_log("[LANGGRAPH] Route A blocked. Recalculating A* matrix..."), 1400);
-        setTimeout(() => add_log("[LANGGRAPH] Detour Route engaged bypassing red hazard zone."), 2100);
+        // Step 1: Wait 1.5s -> Router Agent calculates A* matrix
+        setTimeout(() => {
+            add_log("[LANGGRAPH: Router Agent] Calculating A* detour matrix...");
+        }, 1500);
+
+        // Step 2: Wait another 1.5s (3.0s total) -> Draw new safe blue route
+        setTimeout(() => {
+            if (rt_B) state.map.removeLayer(rt_B);
+            rt_B = L.polyline(c_B, { color: "#00f0ff", weight: 4, dashArray: "10, 6" }).addTo(state.map);
+            add_log("[SYSTEM] New safe route established.");
+            playTacticalBeep("normal");
+        }, 3000);
     });
 
-    // 4. Drop Hosp O2: Turn Hosp A O2 text red (0%), snap route line to Hosp B
+    // 4. Drop Hosp O2: Synchronized emergency reroute sequence
     drp_o2?.addEventListener("click", () => {
+        // Step 0 (Instant): Turn Hosp A O2 text red (0%) & delete current route
         if (h_A) {
             h_A.textContent = "HOSP A | Blood: O- | Beds: 14 | O2: 0% [CRITICAL]";
             h_A.style.color = "red";
         }
         if (rt_A) { state.map.removeLayer(rt_A); rt_A = null; }
-        if (rt_B) state.map.removeLayer(rt_B);
-        rt_B = L.polyline(c_B, { color: "#ff3344", weight: 4, dashArray: "8, 8" }).addTo(state.map);
+        if (rt_B) { state.map.removeLayer(rt_B); rt_B = null; }
 
         playTacticalBeep("critical");
-        triggerEmergencyBanner("HOSPITAL A", "CRITICAL O2 DEPLETION (0%) ➔ SUPPLY ROUTE SNAPPED TO HOSP B");
+        triggerEmergencyBanner("HOSPITAL A", "CRITICAL O2 DEPLETION (0%) ➔ INITIATING EMERGENCY REROUTE");
+        add_log("[TRIAGE AGENT] CRITICAL: Hosp A Oxygen depleted. Initiating emergency reroute.");
 
-        add_log("[HOSP_A] 🚨 O2 sensors reporting rapid pressure drop (0%).");
-        setTimeout(() => add_log("[LANGGRAPH] Resource constraint violated: Hosp A incapacitated."), 700);
-        setTimeout(() => add_log("[LANGGRAPH] Querying secondary triage: Hosp B verified (O2: 100%)."), 1400);
-        setTimeout(() => add_log("[LANGGRAPH] Snapping convoy route to Hospital B."), 2100);
+        // Step 1: Wait 2.0s -> Draw new route to Hosp B
+        setTimeout(() => {
+            if (rt_B) state.map.removeLayer(rt_B);
+            rt_B = L.polyline(c_B, { color: "#ff3344", weight: 4, dashArray: "8, 8" }).addTo(state.map);
+            add_log("[SYSTEM] Rerouted to Hosp B.");
+            playTacticalBeep("normal");
+        }, 2000);
     });
 
     // 5. Clear Route: Delete active routes

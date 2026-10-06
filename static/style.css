@@ -1665,4 +1665,26 @@ body {
     text-overflow: ellipsis;
 }
 
+/* ==========================================================================
+   Gas Hazard Circle Pulse Animation
+   ========================================================================== */
+.gas-hazard-pulse {
+    animation: hazardPlumePulse 2s infinite ease-in-out alternate;
+    filter: drop-shadow(0 0 14px rgba(255, 51, 68, 0.75));
+}
+
+@keyframes hazardPlumePulse {
+    0% {
+        stroke-width: 2px;
+        fill-opacity: 0.25;
+        stroke: #ff3344;
+    }
+    100% {
+        stroke-width: 4px;
+        fill-opacity: 0.45;
+        stroke: #ff6677;
+    }
+}
+
+
 
