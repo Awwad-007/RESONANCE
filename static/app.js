@@ -96,12 +96,22 @@ function initMap() {
     // Add custom zoom control at bottom right
     L.control.zoom({ position: "bottomright" }).addTo(state.map);
 
-    // CartoDB Dark Matter Base Tiles
-    const darkMatterUrl = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-    L.tileLayer(darkMatterUrl, {
-        subdomains: "abcd",
+    // Tactical Military Dark Mode Map Tiles (Esri World Dark Gray Canvas - Dark Grey & Black Streets, Zero Watermark)
+    const darkMapUrl = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+    L.tileLayer(darkMapUrl, {
         maxZoom: 19,
-        opacity: 0.95,
+        maxNativeZoom: 16,
+        attribution: '&copy; <a href="https://www.esri.com/">Esri</a>, HERE, Garmin, &copy; OpenStreetMap contributors',
+        className: "tactical-dark-tiles",
+    }).addTo(state.map);
+
+    // Reference labels overlay
+    const darkRefUrl = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}";
+    L.tileLayer(darkRefUrl, {
+        maxZoom: 19,
+        maxNativeZoom: 16,
+        opacity: 0.8,
+        className: "tactical-dark-labels",
     }).addTo(state.map);
 
     // Initialize Layer Groups
@@ -133,8 +143,8 @@ function setupDisasterOverlays() {
         [37.7940, -122.3970],
         [37.8010, -122.4040],
     ], {
-        color: "#00f0ff",
-        fillColor: "#00f0ff",
+        color: "#00ff41",
+        fillColor: "#00ff41",
         fillOpacity: 0.15,
         weight: 1.5,
         dashArray: "4, 6",
@@ -144,8 +154,8 @@ function setupDisasterOverlays() {
     // 2. Structural Seismic Tremor Zone near SOMA / Financial District
     const seismicCircle = L.circle([37.7890, -122.4020], {
         radius: 450,
-        color: "#ef4444",
-        fillColor: "#ef4444",
+        color: "#ff3344",
+        fillColor: "#ff3344",
         fillOpacity: 0.12,
         weight: 1.5,
         dashArray: "6, 6",
@@ -158,9 +168,9 @@ function setupDisasterOverlays() {
         [37.7880, -122.4030],
         [37.7840, -122.4010], // Moscone Center (ECHO-9)
     ], {
-        color: "#10b981",
+        color: "#00ff41",
         weight: 3,
-        opacity: 0.8,
+        opacity: 0.9,
         dashArray: "8, 8",
     }).bindPopup("<b>CIVILIAN EVACUATION CORRIDOR</b><br>Secured path to Moscone Emergency Shelter.");
     state.layers.corridors.addLayer(evacRoute);
@@ -233,9 +243,9 @@ function updateNodeOnMap(telemetry) {
             state.meshLinks.get(callsign).setLatLngs(linkCoords);
         } else {
             const polyline = L.polyline(linkCoords, {
-                color: "#00f0ff",
+                color: "#00ff41",
                 weight: 1.5,
-                opacity: 0.4,
+                opacity: 0.55,
                 dashArray: "3, 6",
             }).addTo(state.layers.links);
             state.meshLinks.set(callsign, polyline);

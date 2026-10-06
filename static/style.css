@@ -1,39 +1,48 @@
 /* ==========================================================================
    Project RESONANCE - Tactical Disaster Response Mission Control
-   Theme: High-Fidelity Tactical Military Dark Mode & Glassmorphism HUD
+   Theme: Military-Grade Tactical Dark Mode & Raw Hacker Terminal
    ========================================================================== */
 
 :root {
-    --bg-base: #06090e;
-    --bg-surface: #0c111d;
-    --bg-card: rgba(15, 23, 42, 0.85);
-    --bg-card-hover: rgba(30, 41, 59, 0.9);
-    --bg-hud: rgba(10, 15, 26, 0.92);
+    /* Base Backgrounds (Very Dark Grey & Pitch Black) */
+    --bg-base: #111111;
+    --bg-surface: #141414;
+    --bg-card: #080808;
+    --bg-card-hover: #121212;
+    --bg-hud: rgba(17, 17, 17, 0.95);
+    --bg-terminal: #000000;
     
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-glow: rgba(0, 240, 255, 0.3);
-    --border-active: #00f0ff;
+    /* Tactical Glowing Borders */
+    --border-subtle: rgba(0, 255, 65, 0.22);
+    --border-glow: rgba(0, 255, 65, 0.45);
+    --border-active: #00ff41;
 
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --text-glow: #e0f2fe;
+    /* Text Colors - Neon Green & Bright White */
+    --text-primary: #ffffff;
+    --text-secondary: #00ff41;
+    --text-muted: rgba(0, 255, 65, 0.75);
+    --text-glow: #00ff41;
+    --text-white: #ffffff;
 
-    /* Accent & Status Colors */
-    --accent-cyan: #00f0ff;
-    --accent-cyan-glow: rgba(0, 240, 255, 0.4);
-    --accent-emerald: #10b981;
-    --accent-emerald-glow: rgba(16, 185, 129, 0.4);
-    --accent-amber: #f59e0b;
-    --accent-red: #ef4444;
-    --accent-red-glow: rgba(239, 68, 68, 0.5);
-    --accent-blue: #3b82f6;
-    --accent-purple: #a855f7;
+    /* Tactical Military Phosphor Green & Status Accents */
+    --neon-green: #00ff41;
+    --neon-green-glow: rgba(0, 255, 65, 0.5);
+    --neon-green-dim: rgba(0, 255, 65, 0.12);
+    --accent-cyan: #00ff41;
+    --accent-cyan-glow: rgba(0, 255, 65, 0.4);
+    --accent-emerald: #00ff41;
+    --accent-emerald-glow: rgba(0, 255, 65, 0.4);
+    --accent-amber: #ffb703;
+    --accent-amber-glow: rgba(255, 183, 3, 0.4);
+    --accent-red: #ff3344;
+    --accent-red-glow: rgba(255, 51, 68, 0.5);
+    --accent-blue: #00ff41;
+    --accent-purple: #00ff41;
 
     /* Fonts */
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
-    --font-display: 'Rajdhani', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+    --font-display: 'Rajdhani', 'JetBrains Mono', sans-serif;
 
     --sidebar-width: 440px;
     --header-height: 64px;
@@ -63,14 +72,15 @@ body {
     height: 6px;
 }
 ::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
+    background: #000000;
 }
 ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 3px;
+    background: rgba(0, 255, 65, 0.35);
+    border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--accent-cyan);
+    background: var(--neon-green);
+    box-shadow: 0 0 8px var(--neon-green);
 }
 
 /* ==========================================================================
@@ -81,7 +91,11 @@ body {
     flex-direction: column;
     height: 100vh;
     width: 100vw;
-    background: radial-gradient(circle at top right, #111a2e 0%, #06090e 60%);
+    background-color: #111111;
+    background-image: 
+        linear-gradient(rgba(0, 255, 65, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 65, 0.025) 1px, transparent 1px);
+    background-size: 32px 32px;
 }
 
 /* ==========================================================================
@@ -89,15 +103,15 @@ body {
    ========================================================================== */
 .top-hud-bar {
     height: var(--header-height);
-    background: var(--bg-hud);
+    background: #0d0d0d;
     backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: 1px solid rgba(0, 255, 65, 0.28);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
     z-index: 1000;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(0, 255, 65, 0.15);
 }
 
 .brand-section {
@@ -118,9 +132,9 @@ body {
 .pulse-core {
     width: 10px;
     height: 10px;
-    background-color: var(--accent-cyan);
+    background-color: var(--neon-green);
     border-radius: 50%;
-    box-shadow: 0 0 12px var(--accent-cyan);
+    box-shadow: 0 0 12px var(--neon-green);
     z-index: 2;
 }
 
@@ -129,7 +143,7 @@ body {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 1.5px solid var(--accent-cyan);
+    border: 1.5px solid var(--neon-green);
     animation: radarRipple 2s infinite ease-out;
 }
 
@@ -150,16 +164,17 @@ body {
     font-weight: 700;
     letter-spacing: 2.5px;
     color: #ffffff;
-    text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
     line-height: 1.1;
 }
 
 .brand-subtitle {
     font-family: var(--font-mono);
     font-size: 9px;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 1.5px;
-    color: var(--accent-cyan);
+    color: var(--neon-green);
+    text-shadow: 0 0 6px rgba(0, 255, 65, 0.4);
     display: block;
 }
 
@@ -171,20 +186,21 @@ body {
 }
 
 .stat-pill {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border-subtle);
-    border-radius: 6px;
+    background: #151515;
+    border: 1px solid rgba(0, 255, 65, 0.25);
+    border-radius: 4px;
     padding: 6px 12px;
     display: flex;
     flex-direction: column;
     min-width: 84px;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.7);
 }
 
 .stat-label {
     font-family: var(--font-mono);
     font-size: 9px;
-    font-weight: 600;
-    color: var(--text-muted);
+    font-weight: 700;
+    color: #ffffff;
     letter-spacing: 1px;
 }
 
@@ -192,12 +208,22 @@ body {
     font-family: var(--font-mono);
     font-size: 13px;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--neon-green);
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.4);
 }
 
-.highlight-cyan { color: var(--accent-cyan) !important; }
-.highlight-green { color: var(--accent-emerald) !important; }
-.highlight-red { color: var(--accent-red) !important; }
+.highlight-cyan { 
+    color: var(--neon-green) !important; 
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.5) !important; 
+}
+.highlight-green { 
+    color: var(--neon-green) !important; 
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.5) !important; 
+}
+.highlight-red { 
+    color: var(--accent-red) !important; 
+    text-shadow: 0 0 8px rgba(255, 51, 68, 0.5) !important; 
+}
 
 /* Status & Clock */
 .system-status-section {
@@ -211,26 +237,29 @@ body {
     align-items: center;
     gap: 8px;
     padding: 5px 12px;
-    border-radius: 20px;
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 4px;
+    background: #141414;
+    border: 1px solid rgba(0, 255, 65, 0.4);
     font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 600;
+    color: var(--neon-green);
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);
 }
 
 .connection-badge.connected .status-dot {
-    background-color: var(--accent-emerald);
-    box-shadow: 0 0 8px var(--accent-emerald);
+    background-color: var(--neon-green);
+    box-shadow: 0 0 10px var(--neon-green);
 }
 
 .connection-badge.disconnected {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.3);
+    background: #141414;
+    border-color: rgba(255, 51, 68, 0.4);
+    color: var(--accent-red);
 }
 .connection-badge.disconnected .status-dot {
     background-color: var(--accent-red);
-    box-shadow: 0 0 8px var(--accent-red);
+    box-shadow: 0 0 10px var(--accent-red);
 }
 
 .status-dot {
@@ -241,35 +270,38 @@ body {
 }
 
 @keyframes statusBlink {
-    from { opacity: 0.5; }
+    from { opacity: 0.4; }
     to { opacity: 1; }
 }
 
 .status-latency {
-    color: var(--text-muted);
+    color: #ffffff;
     font-size: 10px;
+    font-family: var(--font-mono);
 }
 
 .mission-clock {
     display: flex;
     flex-direction: column;
     text-align: right;
-    border-left: 1px solid var(--border-subtle);
+    border-left: 1px solid rgba(0, 255, 65, 0.25);
     padding-left: 14px;
 }
 
 .clock-label {
     font-family: var(--font-mono);
     font-size: 8px;
-    color: var(--text-muted);
+    color: #ffffff;
     letter-spacing: 1px;
+    font-weight: 600;
 }
 
 .clock-time {
     font-family: var(--font-mono);
     font-size: 13px;
     font-weight: 700;
-    color: var(--accent-cyan);
+    color: var(--neon-green);
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.4);
 }
 
 .hud-actions {
@@ -278,11 +310,11 @@ body {
 }
 
 .hud-btn {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-subtle);
-    color: var(--text-primary);
+    background: #141414;
+    border: 1px solid rgba(0, 255, 65, 0.35);
+    color: var(--neon-green);
     padding: 6px 10px;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -294,10 +326,15 @@ body {
 }
 
 .hud-btn:hover {
-    background: rgba(0, 240, 255, 0.15);
-    border-color: var(--accent-cyan);
-    color: #ffffff;
-    box-shadow: 0 0 10px var(--accent-cyan-glow);
+    background: var(--neon-green);
+    border-color: var(--neon-green);
+    color: #000000;
+    box-shadow: 0 0 12px rgba(0, 255, 65, 0.6);
+}
+
+.hud-btn:hover .btn-label,
+.hud-btn:hover .btn-icon {
+    color: #000000;
 }
 
 /* ==========================================================================
@@ -309,26 +346,33 @@ body {
     height: calc(100vh - var(--header-height));
     overflow: hidden;
     position: relative;
+    background-color: #111111;
 }
 
 /* ==========================================================================
-   Map Viewport & Overlays
+   Map Viewport & Tactical Overlays
    ========================================================================== */
 .map-viewport-wrapper {
     flex: 1;
     position: relative;
     height: 100%;
-    background-color: #05070a;
+    background-color: #111111;
 }
 
 .tactical-map-container {
     width: 100%;
     height: 100%;
-    background: #080c14;
+    background-color: #111111;
     z-index: 1;
 }
 
-/* Glassmorphism Map Overlays */
+/* Military Dark Matter Tile Styling (Dark Grey and Black Streets) */
+.tactical-dark-tiles,
+.leaflet-tile-pane {
+    filter: brightness(0.88) contrast(1.22);
+}
+
+/* Tactical HUD Overlays */
 .map-hud-overlay {
     position: absolute;
     z-index: 400;
@@ -340,29 +384,31 @@ body {
 .map-hud-overlay.bottom-left { bottom: 20px; left: 16px; }
 
 .overlay-box {
-    background: var(--bg-hud);
+    background: rgba(17, 17, 17, 0.94);
     backdrop-filter: blur(12px);
-    border: 1px solid var(--border-subtle);
-    border-radius: 8px;
+    border: 1px solid rgba(0, 255, 65, 0.35);
+    border-radius: 4px;
     padding: 10px 14px;
     pointer-events: auto;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 255, 65, 0.12);
 }
 
 .box-title {
-    font-family: var(--font-display);
+    font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 1.2px;
-    color: var(--accent-cyan);
+    color: var(--neon-green);
     margin-bottom: 6px;
     text-transform: uppercase;
+    text-shadow: 0 0 6px rgba(0, 255, 65, 0.4);
 }
 
 .grid-coords {
     font-family: var(--font-mono);
     font-size: 11px;
-    color: var(--text-secondary);
+    color: #ffffff;
+    font-weight: 500;
 }
 
 .map-layer-toggles {
@@ -376,13 +422,14 @@ body {
     align-items: center;
     gap: 8px;
     font-size: 11px;
-    color: var(--text-secondary);
+    color: #ffffff;
     cursor: pointer;
     user-select: none;
+    font-family: var(--font-mono);
 }
 
 .layer-toggle-item input {
-    accent-color: var(--accent-cyan);
+    accent-color: var(--neon-green);
     cursor: pointer;
 }
 
@@ -395,8 +442,9 @@ body {
 .selector-label {
     font-family: var(--font-mono);
     font-size: 10px;
-    color: var(--text-muted);
-    font-weight: 600;
+    color: var(--neon-green);
+    font-weight: 700;
+    text-shadow: 0 0 4px rgba(0, 255, 65, 0.4);
 }
 
 .node-quick-tags {
@@ -406,11 +454,11 @@ body {
 }
 
 .tag-btn {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-subtle);
-    color: var(--text-primary);
+    background: #141414;
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    color: #ffffff;
     padding: 3px 8px;
-    border-radius: 4px;
+    border-radius: 3px;
     font-family: var(--font-mono);
     font-size: 10px;
     font-weight: 600;
@@ -419,10 +467,11 @@ body {
 }
 
 .tag-btn:hover {
-    background: var(--accent-cyan);
+    background: var(--neon-green);
     color: #000000;
-    border-color: var(--accent-cyan);
+    border-color: var(--neon-green);
     font-weight: 700;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.6);
 }
 
 /* Emergency Banner Notification */
@@ -430,7 +479,7 @@ body {
     position: absolute;
     top: 20px;
     left: 50%;
-    transform: translateX(-50%) translateY(-100px);
+    transform: translateX(-50%) translateY(-120px);
     z-index: 500;
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     pointer-events: none;
@@ -442,15 +491,16 @@ body {
 }
 
 .banner-content {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(153, 27, 27, 0.95));
-    border: 1px solid #f87171;
-    box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
-    border-radius: 8px;
+    background: #000000;
+    border: 2px solid var(--accent-red);
+    box-shadow: 0 0 35px rgba(255, 51, 68, 0.7), inset 0 0 15px rgba(255, 51, 68, 0.2);
+    border-radius: 4px;
     padding: 12px 20px;
     display: flex;
     align-items: center;
     gap: 14px;
     color: #ffffff;
+    font-family: var(--font-mono);
 }
 
 .banner-alert-icon {
@@ -464,82 +514,93 @@ body {
 }
 
 .banner-text strong {
-    font-family: var(--font-display);
+    font-family: var(--font-mono);
     font-size: 14px;
     letter-spacing: 1px;
     display: block;
+    color: var(--accent-red);
+    text-shadow: 0 0 8px var(--accent-red);
 }
 
 .banner-text p {
     font-size: 11px;
-    opacity: 0.9;
+    color: #ffffff;
 }
 
 .banner-dismiss {
-    background: #ffffff;
-    color: #991b1b;
+    background: var(--accent-red);
+    color: #000000;
     border: none;
     padding: 6px 12px;
-    border-radius: 4px;
+    border-radius: 3px;
     font-family: var(--font-mono);
     font-size: 10px;
     font-weight: 700;
     cursor: pointer;
+    box-shadow: 0 0 12px rgba(255, 51, 68, 0.7);
 }
 
 /* ==========================================================================
-   Sidebar: Live Radio Telemetry Terminal
+   Data Ticker Panel (Raw Hacker Terminal)
    ========================================================================== */
 .sidebar-terminal-panel {
     width: var(--sidebar-width);
-    background: var(--bg-surface);
-    border-left: 1px solid var(--border-subtle);
+    background: #000000;
+    border-left: 1px solid rgba(0, 255, 65, 0.4);
     display: flex;
     flex-direction: column;
     height: 100%;
     z-index: 10;
-    box-shadow: -4px 0 25px rgba(0, 0, 0, 0.5);
+    box-shadow: -4px 0 25px rgba(0, 0, 0, 0.95), -1px 0 15px rgba(0, 255, 65, 0.18);
+    position: relative;
+    font-family: var(--font-mono);
 }
 
 .sidebar-header {
-    padding: 12px 16px;
-    background: var(--bg-hud);
-    border-bottom: 1px solid var(--border-subtle);
+    padding: 8px 12px;
+    background: #030303;
+    border-bottom: 1px solid rgba(0, 255, 65, 0.3);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 8px;
 }
 
 .tab-group {
     display: flex;
-    gap: 6px;
+    gap: 4px;
+    flex-shrink: 1;
 }
 
 .tab-btn {
     background: transparent;
     border: 1px solid transparent;
-    color: var(--text-muted);
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-family: var(--font-display);
-    font-size: 12px;
+    color: rgba(255, 255, 255, 0.65);
+    padding: 5px 8px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 10px;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .tab-btn.active {
-    background: rgba(0, 240, 255, 0.1);
-    border-color: rgba(0, 240, 255, 0.3);
-    color: var(--accent-cyan);
+    background: rgba(0, 255, 65, 0.12);
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.35);
+    text-shadow: 0 0 6px var(--neon-green);
 }
 
 .tab-btn:hover:not(.active) {
-    color: var(--text-primary);
+    color: #ffffff;
+    border-color: rgba(0, 255, 65, 0.25);
 }
 
 .terminal-toolbar {
@@ -548,11 +609,11 @@ body {
 }
 
 .tool-btn {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border-subtle);
-    color: var(--text-secondary);
+    background: #080808;
+    border: 1px solid rgba(0, 255, 65, 0.35);
+    color: var(--neon-green);
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: 3px;
     font-family: var(--font-mono);
     font-size: 9px;
     font-weight: 600;
@@ -561,36 +622,93 @@ body {
 }
 
 .tool-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--neon-green);
+    color: #000000;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.6);
+}
+
+/* Terminal CLI Header Banner */
+.terminal-cli-banner {
+    margin: 6px 8px 0 8px;
+    padding: 5px 8px;
+    background: #030303;
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.9);
+}
+
+.cli-user {
     color: #ffffff;
+    font-weight: 700;
+}
+
+.cli-sep {
+    color: rgba(0, 255, 65, 0.5);
+}
+
+.cli-path {
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.cli-prompt {
+    color: var(--neon-green);
+    font-weight: 700;
+}
+
+.cli-cmd {
+    color: var(--neon-green);
+    font-weight: 600;
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cli-cursor {
+    color: var(--neon-green);
+    animation: cursorBlink 1s infinite step-start;
+    text-shadow: 0 0 6px var(--neon-green);
+}
+
+@keyframes cursorBlink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
 }
 
 /* Protocol Micro-Legend */
 .hex-spec-legend {
-    padding: 8px 16px;
-    background: rgba(0, 0, 0, 0.3);
-    border-bottom: 1px solid var(--border-subtle);
+    padding: 6px 14px;
+    background: #020202;
+    border-bottom: 1px solid rgba(0, 255, 65, 0.25);
+    font-family: var(--font-mono);
 }
 
 .legend-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 }
 
 .legend-title {
     font-family: var(--font-mono);
     font-size: 9px;
-    color: var(--text-muted);
-    font-weight: 600;
+    color: #ffffff;
+    font-weight: 700;
     letter-spacing: 0.8px;
 }
 
 .legend-badge {
     font-family: var(--font-mono);
     font-size: 9px;
-    color: var(--accent-cyan);
+    color: var(--neon-green);
     font-weight: 700;
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
 }
 
 .legend-bytes {
@@ -603,18 +721,19 @@ body {
     font-family: var(--font-mono);
     font-size: 8px;
     padding: 2px 5px;
-    border-radius: 3px;
-    font-weight: 600;
+    border-radius: 2px;
+    font-weight: 700;
     letter-spacing: 0.5px;
+    background: #050505;
 }
 
-.chip-node { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
-.chip-type { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
-.chip-bat  { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-.chip-lat  { background: rgba(0, 240, 255, 0.2); color: #38bdf8; border: 1px solid rgba(0, 240, 255, 0.4); }
-.chip-lon  { background: rgba(20, 184, 166, 0.2); color: #2dd4bf; border: 1px solid rgba(20, 184, 166, 0.4); }
-.chip-rf   { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
-.chip-hops { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+.chip-node { background: #050505; color: #ffffff; border: 1px solid rgba(0, 255, 65, 0.45); }
+.chip-type { background: #050505; color: var(--accent-red); border: 1px solid rgba(255, 51, 68, 0.5); }
+.chip-bat  { background: #050505; color: var(--neon-green); border: 1px solid rgba(0, 255, 65, 0.5); }
+.chip-lat  { background: #050505; color: #ffffff; border: 1px solid rgba(0, 255, 65, 0.35); }
+.chip-lon  { background: #050505; color: #ffffff; border: 1px solid rgba(0, 255, 65, 0.35); }
+.chip-rf   { background: #050505; color: var(--accent-amber); border: 1px solid rgba(255, 183, 3, 0.5); }
+.chip-hops { background: #050505; color: var(--neon-green); border: 1px solid rgba(0, 255, 65, 0.4); }
 
 /* Tab Content Containers */
 .tab-content {
@@ -622,6 +741,7 @@ body {
     flex: 1;
     overflow-y: auto;
     position: relative;
+    background: #000000;
 }
 
 .tab-content.active {
@@ -629,14 +749,35 @@ body {
     flex-direction: column;
 }
 
-/* Scrolling Terminal Stream */
+/* Scrolling Terminal Stream (The Hacker Data Ticker Feed) */
 .telemetry-stream-container {
     flex: 1;
-    padding: 12px;
+    padding: 10px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     overflow-y: auto;
+    background: #000000;
+    /* Raw hacker terminal glowing border */
+    border: 1px solid rgba(0, 255, 65, 0.35);
+    margin: 8px;
+    border-radius: 4px;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.15), inset 0 0 15px rgba(0, 255, 65, 0.05);
+    font-family: var(--font-mono);
+    position: relative;
+}
+
+/* Subtle CRT Scanline Effect in Terminal */
+.telemetry-stream-container::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 255, 65, 0.02) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.01));
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    z-index: 1;
 }
 
 .terminal-placeholder {
@@ -646,17 +787,20 @@ body {
     justify-content: center;
     padding: 60px 20px;
     text-align: center;
-    color: var(--text-muted);
+    color: var(--neon-green);
+    font-family: var(--font-mono);
+    z-index: 2;
 }
 
 .placeholder-spinner {
     width: 32px;
     height: 32px;
-    border: 2px solid rgba(0, 240, 255, 0.1);
-    border-top: 2px solid var(--accent-cyan);
+    border: 2px solid rgba(0, 255, 65, 0.15);
+    border-top: 2px solid var(--neon-green);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 16px;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
 }
 
 @keyframes spin {
@@ -667,31 +811,38 @@ body {
 .placeholder-text {
     font-family: var(--font-mono);
     font-size: 12px;
-    color: var(--text-secondary);
+    color: var(--neon-green);
     margin-bottom: 6px;
+    text-shadow: 0 0 6px rgba(0, 255, 65, 0.6);
 }
 
 .placeholder-sub {
+    font-family: var(--font-mono);
     font-size: 10px;
+    color: #ffffff;
 }
 
-/* Telemetry Packet Card */
+/* Raw Hacker Terminal Packet Cards */
 .packet-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: 8px;
-    padding: 10px 12px;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    background: #040404;
+    border: 1px solid rgba(0, 255, 65, 0.25);
+    border-left: 3px solid var(--neon-green);
+    border-radius: 3px;
+    padding: 8px 10px;
+    transition: all 0.15s ease;
     position: relative;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    animation: slideInPacket 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.8), inset 0 0 8px rgba(0, 255, 65, 0.03);
+    animation: slideInPacket 0.25s ease-out;
+    font-family: var(--font-mono);
+    color: var(--neon-green);
+    z-index: 2;
 }
 
 @keyframes slideInPacket {
     from {
         opacity: 0;
-        transform: translateY(12px);
+        transform: translateY(8px);
     }
     to {
         opacity: 1;
@@ -700,34 +851,42 @@ body {
 }
 
 .packet-card:hover {
-    background: var(--bg-card-hover);
-    border-color: rgba(0, 240, 255, 0.4);
+    background: #080808;
+    border-color: var(--neon-green);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.35), inset 0 0 10px rgba(0, 255, 65, 0.06);
     transform: translateX(-2px);
 }
 
 .packet-card.highlight-flash {
-    border-color: var(--accent-cyan);
-    box-shadow: 0 0 16px var(--accent-cyan-glow);
+    border-color: var(--neon-green);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.6);
 }
 
 .packet-card.critical {
     border-left: 3px solid var(--accent-red);
+    border-color: rgba(255, 51, 68, 0.4);
+    box-shadow: 0 0 15px rgba(255, 51, 68, 0.25), inset 0 0 8px rgba(255, 51, 68, 0.05);
 }
+
 .packet-card.warning {
     border-left: 3px solid var(--accent-amber);
+    border-color: rgba(255, 183, 3, 0.35);
 }
+
 .packet-card.info {
-    border-left: 3px solid var(--accent-blue);
+    border-left: 3px solid var(--neon-green);
 }
+
 .packet-card.normal {
-    border-left: 3px solid var(--accent-emerald);
+    border-left: 3px solid var(--neon-green);
 }
 
 .packet-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    font-family: var(--font-mono);
 }
 
 .header-left {
@@ -739,7 +898,8 @@ body {
 .packet-time {
     font-family: var(--font-mono);
     font-size: 10px;
-    color: var(--text-muted);
+    color: #ffffff;
+    font-weight: 500;
 }
 
 .node-callsign-badge {
@@ -747,60 +907,65 @@ body {
     font-size: 11px;
     font-weight: 700;
     color: #ffffff;
-    background: rgba(255, 255, 255, 0.08);
-    padding: 2px 6px;
-    border-radius: 4px;
+    background: #111111;
+    border: 1px solid rgba(0, 255, 65, 0.5);
+    padding: 1px 6px;
+    border-radius: 3px;
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
 }
 
 .priority-tag {
     font-family: var(--font-mono);
     font-size: 9px;
     font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 3px;
+    padding: 1px 6px;
+    border-radius: 2px;
     letter-spacing: 0.5px;
 }
 
-.tag-critical { background: rgba(239, 68, 68, 0.25); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.5); }
-.tag-warning  { background: rgba(245, 158, 11, 0.25); color: #fde047; border: 1px solid rgba(245, 158, 11, 0.5); }
-.tag-info     { background: rgba(59, 130, 246, 0.25); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.5); }
-.tag-normal   { background: rgba(16, 185, 129, 0.25); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.5); }
+.tag-critical { background: #000000; color: var(--accent-red); border: 1px solid var(--accent-red); text-shadow: 0 0 6px var(--accent-red); }
+.tag-warning  { background: #000000; color: var(--accent-amber); border: 1px solid var(--accent-amber); }
+.tag-info     { background: #000000; color: var(--neon-green); border: 1px solid var(--neon-green); }
+.tag-normal   { background: #000000; color: var(--neon-green); border: 1px solid var(--neon-green); }
 
-/* Formatted Hex View in Card */
+/* Raw Monospace Hex View */
 .packet-hex-display {
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-    padding: 5px 8px;
+    background: #000000;
+    border: 1px solid rgba(0, 255, 65, 0.35);
+    border-radius: 3px;
+    padding: 4px 6px;
     font-family: var(--font-mono);
     font-size: 10px;
     letter-spacing: 1px;
     display: flex;
     gap: 4px;
     flex-wrap: wrap;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8);
 }
 
-.hex-b-node { color: #c084fc; font-weight: 700; }
-.hex-b-type { color: #f87171; font-weight: 700; }
-.hex-b-bat  { color: #34d399; font-weight: 700; }
-.hex-b-lat  { color: #38bdf8; }
-.hex-b-lon  { color: #2dd4bf; }
-.hex-b-rf   { color: #fbbf24; }
-.hex-b-mesh { color: #60a5fa; }
+.hex-b-node { color: #ffffff; font-weight: 700; text-shadow: 0 0 4px #ffffff; }
+.hex-b-type { color: var(--accent-red); font-weight: 700; text-shadow: 0 0 4px var(--accent-red); }
+.hex-b-bat  { color: var(--neon-green); font-weight: 700; text-shadow: 0 0 4px var(--neon-green); }
+.hex-b-lat  { color: var(--neon-green); }
+.hex-b-lon  { color: var(--neon-green); }
+.hex-b-rf   { color: var(--accent-amber); }
+.hex-b-mesh { color: var(--neon-green); }
 
 /* Decoded Telemetry Grid */
 .telemetry-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    margin-bottom: 8px;
+    gap: 4px;
+    margin-bottom: 6px;
+    font-family: var(--font-mono);
 }
 
 .telemetry-cell {
-    background: rgba(255, 255, 255, 0.03);
-    padding: 4px 6px;
-    border-radius: 4px;
+    background: #080808;
+    border: 1px solid rgba(0, 255, 65, 0.2);
+    padding: 3px 6px;
+    border-radius: 3px;
     display: flex;
     flex-direction: column;
 }
@@ -808,14 +973,17 @@ body {
 .cell-label {
     font-family: var(--font-mono);
     font-size: 8px;
-    color: var(--text-muted);
+    color: #ffffff;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
 .cell-value {
     font-family: var(--font-mono);
     font-size: 11px;
-    font-weight: 600;
-    color: var(--text-primary);
+    font-weight: 700;
+    color: var(--neon-green);
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
 }
 
 .signal-bars-ui {
@@ -828,52 +996,63 @@ body {
 
 .s-bar {
     width: 2.5px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 255, 65, 0.2);
     border-radius: 1px;
 }
 .s-bar:nth-child(1) { height: 25%; }
 .s-bar:nth-child(2) { height: 50%; }
 .s-bar:nth-child(3) { height: 75%; }
 .s-bar:nth-child(4) { height: 100%; }
-.s-bar.active { background: var(--accent-cyan); box-shadow: 0 0 4px var(--accent-cyan); }
+.s-bar.active { 
+    background: var(--neon-green); 
+    box-shadow: 0 0 6px var(--neon-green); 
+}
 
 .packet-note {
-    font-size: 11px;
-    color: var(--text-secondary);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    padding-top: 6px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: #ffffff;
+    border-top: 1px solid rgba(0, 255, 65, 0.2);
+    padding-top: 4px;
     display: flex;
     align-items: flex-start;
     gap: 6px;
 }
 
 .note-bullet {
-    color: var(--accent-cyan);
+    color: var(--neon-green);
+    text-shadow: 0 0 6px var(--neon-green);
 }
 
 /* ==========================================================================
    Fleet Roster View (Tab 2)
    ========================================================================== */
 .fleet-roster-container {
-    padding: 12px;
+    padding: 10px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    background: #000000;
+    font-family: var(--font-mono);
 }
 
 .roster-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: 8px;
-    padding: 10px 12px;
+    background: #050505;
+    border: 1px solid rgba(0, 255, 65, 0.25);
+    border-left: 3px solid var(--neon-green);
+    border-radius: 3px;
+    padding: 8px 10px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    transition: all 0.2s ease;
+    gap: 6px;
+    transition: all 0.15s ease;
+    cursor: pointer;
 }
 
 .roster-card:hover {
-    border-color: rgba(0, 240, 255, 0.3);
+    border-color: var(--neon-green);
+    background: #0a0a0a;
+    box-shadow: 0 0 12px rgba(0, 255, 65, 0.3);
 }
 
 .roster-top {
@@ -883,15 +1062,17 @@ body {
 }
 
 .roster-callsign {
-    font-family: var(--font-display);
-    font-size: 15px;
+    font-family: var(--font-mono);
+    font-size: 14px;
     font-weight: 700;
     color: #ffffff;
+    text-shadow: 0 0 6px rgba(0, 255, 65, 0.4);
 }
 
 .roster-role {
-    font-size: 11px;
-    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--neon-green);
 }
 
 .battery-bar-container {
@@ -905,29 +1086,42 @@ body {
 
 .battery-bar-fill {
     height: 100%;
-    background: var(--accent-emerald);
+    background: var(--neon-green);
+    box-shadow: 0 0 6px var(--neon-green);
     transition: width 0.3s ease;
 }
 
-.battery-bar-fill.warn { background: var(--accent-amber); }
-.battery-bar-fill.crit { background: var(--accent-red); }
+.battery-bar-fill.warn { background: var(--accent-amber); box-shadow: 0 0 6px var(--accent-amber); }
+.battery-bar-fill.crit { background: var(--accent-red); box-shadow: 0 0 6px var(--accent-red); }
 
 /* Sidebar Footer */
 .sidebar-footer {
     height: 38px;
-    background: var(--bg-hud);
-    border-top: 1px solid var(--border-subtle);
-    padding: 0 16px;
+    background: #020202;
+    border-top: 1px solid rgba(0, 255, 65, 0.3);
+    padding: 0 14px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     font-family: var(--font-mono);
     font-size: 10px;
-    color: var(--text-muted);
 }
 
-.footer-stat .label {
+.sidebar-footer .footer-stat {
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-footer .footer-stat .label {
     margin-right: 4px;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.sidebar-footer .footer-stat .value {
+    color: var(--neon-green);
+    font-weight: 700;
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.4);
 }
 
 /* ==========================================================================
@@ -979,33 +1173,34 @@ body {
 
 .custom-node-marker.hazard .node-pin-core,
 .custom-node-marker.hazard .node-pin-ring {
-    color: #eab308;
+    color: var(--accent-amber);
 }
 
 .custom-node-marker.status .node-pin-core,
 .custom-node-marker.status .node-pin-ring {
-    color: var(--accent-blue);
+    color: var(--neon-green);
 }
 
 .custom-node-marker.beacon .node-pin-core,
 .custom-node-marker.beacon .node-pin-ring {
-    color: var(--accent-emerald);
+    color: var(--neon-green);
 }
 
 /* Custom Leaflet Tooltip / Popup Dark Styles */
 .leaflet-popup-content-wrapper {
-    background: var(--bg-hud) !important;
+    background: #080808 !important;
     backdrop-filter: blur(14px) !important;
-    border: 1px solid var(--border-subtle) !important;
-    color: var(--text-primary) !important;
-    border-radius: 8px !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
+    border: 1px solid var(--neon-green) !important;
+    color: #ffffff !important;
+    border-radius: 4px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.95), 0 0 15px rgba(0, 255, 65, 0.25) !important;
     padding: 4px !important;
+    font-family: var(--font-mono) !important;
 }
 
 .leaflet-popup-tip {
-    background: var(--bg-hud) !important;
-    border: 1px solid var(--border-subtle) !important;
+    background: #080808 !important;
+    border: 1px solid var(--neon-green) !important;
 }
 
 .map-popup-card {
@@ -1014,16 +1209,17 @@ body {
 }
 
 .popup-title {
-    font-family: var(--font-display);
+    font-family: var(--font-mono);
     font-size: 14px;
     font-weight: 700;
-    color: var(--accent-cyan);
+    color: var(--neon-green);
     margin-bottom: 2px;
+    text-shadow: 0 0 6px var(--neon-green);
 }
 
 .popup-sub {
     font-size: 10px;
-    color: var(--text-muted);
+    color: #ffffff;
     margin-bottom: 6px;
 }
 
@@ -1033,12 +1229,39 @@ body {
     gap: 4px;
     font-family: var(--font-mono);
     font-size: 10px;
+    color: #ffffff;
     margin-bottom: 6px;
+}
+
+.popup-metrics b {
+    color: var(--neon-green);
 }
 
 .popup-note {
     font-size: 10px;
-    color: var(--text-secondary);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    border-top: 1px solid rgba(0, 255, 65, 0.25);
     padding-top: 4px;
+}
+
+/* Custom Leaflet Zoom Controls */
+.leaflet-bar {
+    border: 1px solid rgba(0, 255, 65, 0.35) !important;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8) !important;
+    border-radius: 4px !important;
+    overflow: hidden;
+}
+
+.leaflet-bar a {
+    background-color: #0c0c0c !important;
+    color: var(--neon-green) !important;
+    border-bottom: 1px solid rgba(0, 255, 65, 0.25) !important;
+    font-family: var(--font-mono) !important;
+    font-weight: 700 !important;
+}
+
+.leaflet-bar a:hover {
+    background-color: var(--neon-green) !important;
+    color: #000000 !important;
+    box-shadow: 0 0 10px var(--neon-green) !important;
 }
