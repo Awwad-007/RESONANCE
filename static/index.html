@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project RESONANCE | Disaster Response Mission Control</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation / Mission Control HUD Bar -->
+        <header class="top-hud-bar">
+            <div class="brand-section">
+                <div class="radar-pulse-icon">
+                    <span class="pulse-ring"></span>
+                    <span class="pulse-core"></span>
+                </div>
+                <div class="brand-text">
+                    <h1 class="brand-title">RESONANCE</h1>
+                    <span class="brand-subtitle">DISASTER RESPONSE TACTICAL MESH OS</span>
+                </div>
+            </div>
+
+            <!-- Central HUD Metrics -->
+            <div class="hud-stats-cluster">
+                <div class="stat-pill" title="LoRa Radio Network Frequency">
+                    <span class="stat-label">FREQ</span>
+                    <span class="stat-value highlight-cyan">433.92 MHz</span>
+                </div>
+                <div class="stat-pill" title="Total Telemetry Frames Decoded">
+                    <span class="stat-label">PACKETS</span>
+                    <span class="stat-value" id="hud-packet-count">0000</span>
+                </div>
+                <div class="stat-pill" title="Active Transceivers In Mesh">
+                    <span class="stat-label">NODES</span>
+                    <span class="stat-value highlight-green" id="hud-node-count">0/0</span>
+                </div>
+                <div class="stat-pill" title="High Priority Emergencies">
+                    <span class="stat-label">ALERTS</span>
+                    <span class="stat-value highlight-red" id="hud-alert-count">0</span>
+                </div>
+            </div>
+
+            <!-- System Status & Clock -->
+            <div class="system-status-section">
+                <div class="connection-badge connected" id="ws-status-badge">
+                    <span class="status-dot"></span>
+                    <span class="status-text" id="ws-status-text">WS LIVE</span>
+                    <span class="status-latency" id="ws-latency">--ms</span>
+                </div>
+
+                <div class="mission-clock">
+                    <span class="clock-label">ZULU / UTC</span>
+                    <span class="clock-time" id="utc-clock">00:00:00 UTC</span>
+                </div>
+
+                <!-- HUD Action Buttons -->
+                <div class="hud-actions">
+                    <button class="hud-btn" id="btn-audio-toggle" title="Toggle Tactical Audio Chirps">
+                        <span class="btn-icon" id="audio-icon">🔇</span>
+                        <span class="btn-label">AUDIO</span>
+                    </button>
+                    <button class="hud-btn" id="btn-trigger-sos" title="Simulate Quick SOS Event">
+                        <span class="btn-icon">⚡</span>
+                        <span class="btn-label">SIM SOS</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace Area (Map + Side Panel) -->
+        <main class="main-content-layout">
+            <!-- Left & Center: Tactical Disaster Leaflet Map -->
+            <section class="map-viewport-wrapper">
+                <div id="tactical-map" class="tactical-map-container"></div>
+                
+                <!-- Tactical Map HUD Overlays -->
+                <div class="map-hud-overlay top-left">
+                    <div class="overlay-box glass-panel">
+                        <div class="box-title">TACTICAL GRID // SF DISASTER SECTOR</div>
+                        <div class="grid-coords" id="crosshair-coords">LAT: 37.7749° N | LON: -122.4194° W</div>
+                    </div>
+                </div>
+
+                <div class="map-hud-overlay top-right">
+                    <div class="overlay-box glass-panel map-layer-toggles">
+                        <div class="box-title">TACTICAL LAYERS</div>
+                        <label class="layer-toggle-item">
+                            <input type="checkbox" id="toggle-mesh-links" checked>
+                            <span class="checkbox-custom"></span>
+                            <span class="layer-name">Mesh Topology Links</span>
+                        </label>
+                        <label class="layer-toggle-item">
+                            <input type="checkbox" id="toggle-hazard-zones" checked>
+                            <span class="checkbox-custom"></span>
+                            <span class="layer-name">Hazard & Flood Zones</span>
+                        </label>
+                        <label class="layer-toggle-item">
+                            <input type="checkbox" id="toggle-safe-corridor" checked>
+                            <span class="checkbox-custom"></span>
+                            <span class="layer-name">Evac Corridors</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="map-hud-overlay bottom-left">
+                    <div class="overlay-box glass-panel quick-node-selector">
+                        <span class="selector-label">JUMP TO NODE:</span>
+                        <div class="node-quick-tags" id="quick-node-tags">
+                            <button class="tag-btn" onclick="focusNode('ALPHA-1')">ALPHA-1</button>
+                            <button class="tag-btn" onclick="focusNode('BRAVO-4')">BRAVO-4</button>
+                            <button class="tag-btn" onclick="focusNode('CHARLIE-7')">CHARLIE-7</button>
+                            <button class="tag-btn" onclick="focusNode('DELTA-2')">DELTA-2</button>
+                            <button class="tag-btn" onclick="focusNode('ECHO-9')">ECHO-9</button>
+                            <button class="tag-btn" onclick="focusNode('FOXTROT-3')">FOXTROT-3</button>
+                            <button class="tag-btn" onclick="resetMapView()">RESET</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Banner Overlay -->
+                <div class="emergency-banner-overlay" id="emergency-banner">
+                    <div class="banner-content">
+                        <span class="banner-alert-icon">⚠️</span>
+                        <div class="banner-text">
+                            <strong id="banner-title">CRITICAL SOS DETECTED</strong>
+                            <p id="banner-desc">Emergency distress packet intercepted on mesh channel</p>
+                        </div>
+                        <button class="banner-dismiss" onclick="dismissEmergencyBanner()">ACKNOWLEDGE</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Sidebar: Live Radio Telemetry Terminal & Fleet Status -->
+            <aside class="sidebar-terminal-panel">
+                <!-- Sidebar Header & Tab Navigation -->
+                <div class="sidebar-header">
+                    <div class="tab-group">
+                        <button class="tab-btn active" id="tab-btn-telemetry" onclick="switchSidebarTab('telemetry')">
+                            <span class="tab-icon">📡</span> LIVE TELEMETRY
+                        </button>
+                        <button class="tab-btn" id="tab-btn-fleet" onclick="switchSidebarTab('fleet')">
+                            <span class="tab-icon">👥</span> NODE FLEET (<span id="fleet-count">0</span>)
+                        </button>
+                    </div>
+
+                    <div class="terminal-toolbar">
+                        <button class="tool-btn" id="btn-autoscroll-toggle" title="Toggle Auto-Scroll" onclick="toggleAutoScroll()">
+                            <span class="tool-text" id="autoscroll-status">SCROLL: ON</span>
+                        </button>
+                        <button class="tool-btn" title="Clear Telemetry Screen" onclick="clearTelemetryLog()">
+                            <span class="tool-text">CLEAR</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab 1: Live Radio Telemetry Scrolling Terminal -->
+                <div class="tab-content active" id="tab-telemetry-view">
+                    <!-- Protocol Specification Micro-Legend -->
+                    <div class="hex-spec-legend">
+                        <div class="legend-header">
+                            <span class="legend-title">16-BYTE PACKET PROTOCOL</span>
+                            <span class="legend-badge">32 HEX CHARS</span>
+                        </div>
+                        <div class="legend-bytes">
+                            <span class="byte-chip chip-node" title="Offset 00-01: Node ID (2B)">NODE[2]</span>
+                            <span class="byte-chip chip-type" title="Offset 02: Msg Type (1B)">TYPE[1]</span>
+                            <span class="byte-chip chip-bat" title="Offset 03: Battery% (1B)">BAT[1]</span>
+                            <span class="byte-chip chip-lat" title="Offset 04-07: Lat*1M (4B)">LAT[4]</span>
+                            <span class="byte-chip chip-lon" title="Offset 08-11: Lon*1M (4B)">LON[4]</span>
+                            <span class="byte-chip chip-rf" title="Offset 12-13: RSSI & SNR (2B)">RF[2]</span>
+                            <span class="byte-chip chip-hops" title="Offset 14-15: Hops & Seq (2B)">MESH[2]</span>
+                        </div>
+                    </div>
+
+                    <!-- Scrolling Stream Container -->
+                    <div class="telemetry-stream-container" id="telemetry-log-stream">
+                        <div class="terminal-placeholder" id="terminal-placeholder">
+                            <div class="placeholder-spinner"></div>
+                            <p class="placeholder-text">Awaiting mesh radio hardware telemetry...</p>
+                            <span class="placeholder-sub">Ensure simulator.py or field transceivers are transmitting.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Mesh Node Fleet Roster View -->
+                <div class="tab-content" id="tab-fleet-view">
+                    <div class="fleet-roster-container" id="fleet-roster-list">
+                        <!-- Node roster cards dynamically injected here -->
+                    </div>
+                </div>
+
+                <!-- Sidebar Footer Status Bar -->
+                <div class="sidebar-footer">
+                    <div class="footer-stat">
+                        <span class="label">RATE:</span>
+                        <span class="value" id="packet-rate-indicator">0.5 pkts/sec</span>
+                    </div>
+                    <div class="footer-stat">
+                        <span class="label">MESH HOPS:</span>
+                        <span class="value highlight-cyan">AUTO-RELAY</span>
+                    </div>
+                    <div class="footer-stat">
+                        <span class="label">ENCRYPTION:</span>
+                        <span class="value highlight-green">CLEAR-HEX</span>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Leaflet.js -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Application Logic -->
+    <script src="/static/app.js"></script>
+</body>
+</html>
