@@ -180,18 +180,27 @@ function add_log(msg) {
 }
 
 // ---------------------------------------------------------------------------
-// Hospital Triage & Route Demo (Simple Logic)
+// 5 Visible Mesh Network Nodes (nds)
 // ---------------------------------------------------------------------------
+const nds = [
+    [12.9733, 77.6186], // Node 1: MG Road (ALPHA-1)
+    [12.9784, 77.6408], // Node 2: Indiranagar (BRAVO-4)
+    [12.9609, 77.6387], // Node 3: Domlur (CHARLIE-7 / Hazard Node)
+    [12.9352, 77.6245], // Node 4: Koramangala (DELTA-2)
+    [12.9116, 77.6389], // Node 5: HSR Layout (ECHO-9)
+];
+
+// Hospital Route Coordinates
 const c_A = [
-    [12.9733, 77.6186], // Origin: MG Road (ALPHA-1)
+    [12.9733, 77.6186], // Origin: MG Road
     [12.9690, 77.6260],
-    [12.9609, 77.6387], // Domlur / Node #3
+    [12.9609, 77.6387], // Domlur / Node 3
     [12.9510, 77.6395],
     [12.9400, 77.6320], // Hosp A
 ];
 
 const c_B = [
-    [12.9733, 77.6186], // Origin: MG Road (ALPHA-1)
+    [12.9733, 77.6186], // Origin: MG Road
     [12.9660, 77.6110], // Detour West
     [12.9550, 77.6060],
     [12.9430, 77.6090],
@@ -200,6 +209,8 @@ const c_B = [
 
 let rt_A = null;
 let rt_B = null;
+let hz_c = null;
+let h_mk = [];
 
 function initHospDemo() {
     const btn_lk = document.getElementById("btn_lk");
@@ -209,55 +220,80 @@ function initHospDemo() {
     const h_A = document.getElementById("h_A");
     const h_B = document.getElementById("h_B");
 
+    // 1. Draw 5 visible glowing green circle markers on the map
+    nds.forEach((pt, idx) => {
+        L.circleMarker(pt, {
+            radius: 8,
+            color: "#00ff41",
+            fillColor: "#00ff41",
+            fillOpacity: 0.85,
+            weight: 2,
+        }).addTo(state.map).bindPopup(`<b>MESH NODE #${idx + 1}</b><br>Lat: ${pt[0]} | Lon: ${pt[1]}`);
+    });
+
     // Draw initial active route to Hosp A
     if (rt_A) state.map.removeLayer(rt_A);
     rt_A = L.polyline(c_A, { color: "#00ff41", weight: 4, dashArray: "10, 6" }).addTo(state.map);
 
     // Initial greeting log
-    add_log("[SYSTEM] Tactical mesh network online (433.92 MHz).");
+    add_log("[SYSTEM] Tactical mesh network online (5 nodes verified).");
 
-    // Hospital map markers
-    L.marker(c_A[c_A.length - 1], {
-        icon: L.divIcon({ className: "hosp-marker", html: '<div class="hosp-pin" id="pin_A">🏥 Hosp A</div>', iconSize: [75, 20], iconAnchor: [37, 10] })
-    }).addTo(state.map).bindPopup("<b>HOSPITAL A</b><br>Primary Destination");
+    // 2. Draw two distinct hospital markers labeled "Hosp A" and "Hosp B"
+    const mk_A = L.marker(c_A[c_A.length - 1], {
+        icon: L.divIcon({ className: "hosp-marker", html: '<div class="hosp-pin" id="pin_A">🏥 Hosp A</div>', iconSize: [80, 20], iconAnchor: [40, 10] })
+    }).addTo(state.map).bindPopup("<b>HOSPITAL A</b><br>Blood: O- | Beds: 14 | O2: 100%");
 
-    L.marker(c_B[c_B.length - 1], {
-        icon: L.divIcon({ className: "hosp-marker", html: '<div class="hosp-pin" id="pin_B">🏥 Hosp B</div>', iconSize: [75, 20], iconAnchor: [37, 10] })
-    }).addTo(state.map).bindPopup("<b>HOSPITAL B</b><br>Emergency Backup Facility");
+    const mk_B = L.marker(c_B[c_B.length - 1], {
+        icon: L.divIcon({ className: "hosp-marker", html: '<div class="hosp-pin" id="pin_B">🏥 Hosp B</div>', iconSize: [80, 20], iconAnchor: [40, 10] })
+    }).addTo(state.map).bindPopup("<b>HOSPITAL B</b><br>Blood: A+ | Beds: 28 | O2: 100%");
 
-    // 1. Trigger Leak
+    h_mk = [mk_A, mk_B];
+
+    // 3. Trigger Leak: Draw red hazard circle over node #3, delete current route, draw detour bypassing circle
     btn_lk?.addEventListener("click", () => {
-        triggerManualGasLeak();
-        add_log("[NODE_3] ⚠️ Acoustic anomaly.");
-        setTimeout(() => add_log("[LANGGRAPH] Quorum reached. Generating plume."), 800);
-        setTimeout(() => add_log("[LANGGRAPH] Route blocked. Recalculating A* matrix..."), 1600);
-        setTimeout(() => add_log("[LANGGRAPH] Detour engaged: Corridor Richmond/Adugodi clear."), 2400);
+        if (hz_c) state.map.removeLayer(hz_c);
+        hz_c = L.circle(nds[2], {
+            radius: 750,
+            color: "#ff3344",
+            fillColor: "#ff3344",
+            fillOpacity: 0.35,
+            weight: 2,
+            dashArray: "6, 6"
+        }).addTo(state.map).bindPopup("<b>⚠️ TOXIC GAS PLUME HAZARD</b><br>Concentration: >850 PPM (LETHAL)");
+
+        if (rt_A) { state.map.removeLayer(rt_A); rt_A = null; }
+        if (rt_B) state.map.removeLayer(rt_B);
+        rt_B = L.polyline(c_B, { color: "#00f0ff", weight: 4, dashArray: "10, 6" }).addTo(state.map);
+
+        playTacticalBeep("critical");
+        triggerEmergencyBanner("NODE #3 (DOMLUR)", "CRITICAL GAS LEAK DETECTED ➔ AI RECALCULATED DETOUR ACTIVE");
+
+        add_log("[NODE_3] ⚠️ Acoustic anomaly detected (Domlur).");
+        setTimeout(() => add_log("[LANGGRAPH] Quorum reached. Generating red hazard plume."), 700);
+        setTimeout(() => add_log("[LANGGRAPH] Route A blocked. Recalculating A* matrix..."), 1400);
+        setTimeout(() => add_log("[LANGGRAPH] Detour Route engaged bypassing red hazard zone."), 2100);
     });
 
-    // 2. Drop Hosp O2: change Hosp A text to 0%, turn red, delete route A, draw route B
+    // 4. Drop Hosp O2: Turn Hosp A O2 text red (0%), snap route line to Hosp B
     drp_o2?.addEventListener("click", () => {
         if (h_A) {
-            h_A.textContent = "Hosp A: 0%";
+            h_A.textContent = "HOSP A | Blood: O- | Beds: 14 | O2: 0% [CRITICAL]";
             h_A.style.color = "red";
         }
-        if (rt_A) {
-            state.map.removeLayer(rt_A);
-            rt_A = null;
-        }
-        if (state.layers && state.layers.routes) state.layers.routes.clearLayers();
+        if (rt_A) { state.map.removeLayer(rt_A); rt_A = null; }
         if (rt_B) state.map.removeLayer(rt_B);
         rt_B = L.polyline(c_B, { color: "#ff3344", weight: 4, dashArray: "8, 8" }).addTo(state.map);
 
         playTacticalBeep("critical");
-        triggerEmergencyBanner("HOSPITAL A", "CRITICAL O2 DEPLETION (0%) ➔ DETOUR TO HOSP B ACTIVATED");
+        triggerEmergencyBanner("HOSPITAL A", "CRITICAL O2 DEPLETION (0%) ➔ SUPPLY ROUTE SNAPPED TO HOSP B");
 
         add_log("[HOSP_A] 🚨 O2 sensors reporting rapid pressure drop (0%).");
         setTimeout(() => add_log("[LANGGRAPH] Resource constraint violated: Hosp A incapacitated."), 700);
-        setTimeout(() => add_log("[LANGGRAPH] Querying secondary triage: Hosp B capacity verified."), 1400);
-        setTimeout(() => add_log("[LANGGRAPH] Re-routing supply convoy to Hospital B via alternate corridor."), 2100);
+        setTimeout(() => add_log("[LANGGRAPH] Querying secondary triage: Hosp B verified (O2: 100%)."), 1400);
+        setTimeout(() => add_log("[LANGGRAPH] Snapping convoy route to Hospital B."), 2100);
     });
 
-    // 3. Clear Route: delete active routes
+    // 5. Clear Route: Delete active routes
     btn_clr?.addEventListener("click", () => {
         if (rt_A) { state.map.removeLayer(rt_A); rt_A = null; }
         if (rt_B) { state.map.removeLayer(rt_B); rt_B = null; }
@@ -265,22 +301,23 @@ function initHospDemo() {
         add_log("[OPERATOR] Active convoy route cleared.");
     });
 
-    // 4. Reset: restore initial state
+    // 6. Reset: Restore initial state & routes
     btn_rst?.addEventListener("click", () => {
+        if (hz_c) { state.map.removeLayer(hz_c); hz_c = null; }
         if (rt_B) { state.map.removeLayer(rt_B); rt_B = null; }
         if (rt_A) state.map.removeLayer(rt_A);
         rt_A = L.polyline(c_A, { color: "#00ff41", weight: 4, dashArray: "10, 6" }).addTo(state.map);
 
         if (h_A) {
-            h_A.textContent = "Hosp A: 100% O2";
+            h_A.textContent = "HOSP A | Blood: O- | Beds: 14 | O2: 100%";
             h_A.style.color = "#00ff41";
         }
         if (h_B) {
-            h_B.textContent = "Hosp B: 100% O2";
+            h_B.textContent = "HOSP B | Blood: A+ | Beds: 28 | O2: 100%";
             h_B.style.color = "#00ff41";
         }
         resetDisasterState();
-        add_log("[SYSTEM] Resetting grid state & restoring primary supply route.");
+        add_log("[SYSTEM] Grid state reset: Primary route to Hosp A restored.");
     });
 }
 
