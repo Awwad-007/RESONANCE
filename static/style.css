@@ -382,6 +382,35 @@ body {
 .map-hud-overlay.top-left { top: 16px; left: 16px; }
 .map-hud-overlay.top-right { top: 16px; right: 16px; }
 .map-hud-overlay.bottom-left { bottom: 20px; left: 16px; }
+.map-hud-overlay.hospital-status-box { top: 82px; left: 16px; }
+
+.hosp-status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.hosp-status-item {
+    color: var(--neon-green);
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.4);
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.hosp-pin {
+    background: #050505;
+    border: 1px solid var(--neon-green);
+    color: #ffffff;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    box-shadow: 0 0 8px rgba(0, 255, 65, 0.35);
+    white-space: nowrap;
+}
 
 .overlay-box {
     background: rgba(17, 17, 17, 0.94);
@@ -1597,5 +1626,17 @@ body {
 .tag-danger:hover {
     background: #ff3344 !important;
     color: #ffffff !important;
+}
+
+.btn-warn-glow {
+    background: rgba(255, 183, 3, 0.15) !important;
+    border-color: rgba(255, 183, 3, 0.5) !important;
+    color: #ffd166 !important;
+}
+
+.btn-warn-glow:hover {
+    background: #ffb703 !important;
+    color: #000000 !important;
+    box-shadow: 0 0 16px rgba(255, 183, 3, 0.8) !important;
 }
 

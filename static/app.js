@@ -130,12 +130,22 @@ function initMap() {
 
     L.control.zoom({ position: "bottomright" }).addTo(state.map);
 
-    // CartoDB Dark Matter Base Tiles
-    const darkMatterUrl = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-    L.tileLayer(darkMatterUrl, {
-        subdomains: "abcd",
+    // Tactical Military Dark Mode Map Tiles (Esri World Dark Gray Canvas - Dark Grey & Black Streets, Zero Watermark)
+    const darkMapUrl = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+    L.tileLayer(darkMapUrl, {
         maxZoom: 19,
-        opacity: 0.95,
+        maxNativeZoom: 16,
+        attribution: '&copy; <a href="https://www.esri.com/">Esri</a>, HERE, Garmin, &copy; OpenStreetMap contributors',
+        className: "tactical-dark-tiles",
+    }).addTo(state.map);
+
+    // Reference labels overlay
+    const darkRefUrl = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}";
+    L.tileLayer(darkRefUrl, {
+        maxZoom: 19,
+        maxNativeZoom: 16,
+        opacity: 0.8,
+        className: "tactical-dark-labels",
     }).addTo(state.map);
 
     // Initialize Layer Groups
@@ -144,8 +154,8 @@ function initMap() {
     state.layers.links = L.layerGroup().addTo(state.map);
     state.layers.nodes = L.layerGroup().addTo(state.map);
 
-    // Initialize the default Primary Convoy Route A
-    initInitialRouteA();
+    // Initialize the Hospital Triage Demo & Route
+    initHospDemo();
 
     // Map Crosshair Coordinate Tracker
     state.map.on("mousemove", (e) => {
@@ -157,50 +167,94 @@ function initMap() {
 }
 
 // ---------------------------------------------------------------------------
-// Initial Active Convoy Route A (Direct Path through Node #3)
+// Hospital Triage & Route Demo (Simple Logic)
 // ---------------------------------------------------------------------------
-function initInitialRouteA() {
-    // Clear any previous routes
-    state.layers.routes.clearLayers();
-    state.routeMarkers = [];
+const c_A = [
+    [12.9733, 77.6186], // Origin: MG Road (ALPHA-1)
+    [12.9690, 77.6260],
+    [12.9609, 77.6387], // Domlur / Node #3
+    [12.9510, 77.6395],
+    [12.9400, 77.6320], // Hosp A
+];
 
-    // Outer glow polyline (Electric Blue)
-    const glowLine = L.polyline(ROUTE_A_COORDS, {
-        color: "#00f0ff",
-        weight: 8,
-        opacity: 0.35,
-        lineCap: "round",
+const c_B = [
+    [12.9733, 77.6186], // Origin: MG Road (ALPHA-1)
+    [12.9660, 77.6110], // Detour West
+    [12.9550, 77.6060],
+    [12.9430, 77.6090],
+    [12.9352, 77.6245], // Hosp B
+];
+
+let rt_A = null;
+let rt_B = null;
+
+function initHospDemo() {
+    const btn_lk = document.getElementById("btn_lk");
+    const drp_o2 = document.getElementById("drp_o2");
+    const btn_clr = document.getElementById("btn_clr");
+    const btn_rst = document.getElementById("btn_rst");
+    const h_A = document.getElementById("h_A");
+    const h_B = document.getElementById("h_B");
+
+    // Draw initial active route to Hosp A
+    if (rt_A) state.map.removeLayer(rt_A);
+    rt_A = L.polyline(c_A, { color: "#00ff41", weight: 4, dashArray: "10, 6" }).addTo(state.map);
+
+    // Hospital map markers
+    L.marker(c_A[c_A.length - 1], {
+        icon: L.divIcon({ className: "hosp-marker", html: '<div class="hosp-pin" id="pin_A">🏥 Hosp A</div>', iconSize: [75, 20], iconAnchor: [37, 10] })
+    }).addTo(state.map).bindPopup("<b>HOSPITAL A</b><br>Primary Destination");
+
+    L.marker(c_B[c_B.length - 1], {
+        icon: L.divIcon({ className: "hosp-marker", html: '<div class="hosp-pin" id="pin_B">🏥 Hosp B</div>', iconSize: [75, 20], iconAnchor: [37, 10] })
+    }).addTo(state.map).bindPopup("<b>HOSPITAL B</b><br>Emergency Backup Facility");
+
+    // 1. Trigger Leak
+    btn_lk?.addEventListener("click", () => {
+        triggerManualGasLeak();
     });
 
-    // Core sharp active route line
-    state.routeA_Original = L.polyline(ROUTE_A_COORDS, {
-        color: "#00f0ff",
-        weight: 3.5,
-        opacity: 0.95,
-        dashArray: "10, 6",
-        className: "active-convoy-route-a",
-    }).bindPopup("<b>PRIMARY CONVOY ROUTE A (ORIGINAL DIRECT PATH)</b><br>MG Road ➔ Domlur ➔ HSR Evac Base (7.2 km)<br><span style='color: #00ff41;'>● STATUS: ACTIVE TRANSIT</span>");
+    // 2. Drop Hosp O2: change Hosp A text to 0%, turn red, delete route A, draw route B
+    drp_o2?.addEventListener("click", () => {
+        if (h_A) {
+            h_A.textContent = "Hosp A: 0%";
+            h_A.style.color = "red";
+        }
+        if (rt_A) {
+            state.map.removeLayer(rt_A);
+            rt_A = null;
+        }
+        if (state.layers && state.layers.routes) state.layers.routes.clearLayers();
+        if (rt_B) state.map.removeLayer(rt_B);
+        rt_B = L.polyline(c_B, { color: "#ff3344", weight: 4, dashArray: "8, 8" }).addTo(state.map);
 
-    state.layers.routes.addLayer(glowLine);
-    state.layers.routes.addLayer(state.routeA_Original);
-
-    // Add Start and End Waypoint Markers
-    const startIcon = L.divIcon({
-        className: "waypoint-marker start-wp",
-        html: `<div class="wp-badge wp-start">ORIGIN [ALPHA-1]</div>`,
-        iconSize: [80, 20],
-        iconAnchor: [40, 10],
-    });
-    const endIcon = L.divIcon({
-        className: "waypoint-marker end-wp",
-        html: `<div class="wp-badge wp-end">DEST [ECHO-9]</div>`,
-        iconSize: [80, 20],
-        iconAnchor: [40, 10],
+        playTacticalBeep("critical");
+        triggerEmergencyBanner("HOSPITAL A", "CRITICAL O2 DEPLETION (0%) ➔ DETOUR TO HOSP B ACTIVATED");
     });
 
-    const startMarker = L.marker(ROUTE_A_COORDS[0], { icon: startIcon }).addTo(state.layers.routes);
-    const endMarker = L.marker(ROUTE_A_COORDS[ROUTE_A_COORDS.length - 1], { icon: endIcon }).addTo(state.layers.routes);
-    state.routeMarkers = [startMarker, endMarker, glowLine];
+    // 3. Clear Route: delete active routes
+    btn_clr?.addEventListener("click", () => {
+        if (rt_A) { state.map.removeLayer(rt_A); rt_A = null; }
+        if (rt_B) { state.map.removeLayer(rt_B); rt_B = null; }
+        if (state.layers && state.layers.routes) state.layers.routes.clearLayers();
+    });
+
+    // 4. Reset: restore initial state
+    btn_rst?.addEventListener("click", () => {
+        if (rt_B) { state.map.removeLayer(rt_B); rt_B = null; }
+        if (rt_A) state.map.removeLayer(rt_A);
+        rt_A = L.polyline(c_A, { color: "#00ff41", weight: 4, dashArray: "10, 6" }).addTo(state.map);
+
+        if (h_A) {
+            h_A.textContent = "Hosp A: 100% O2";
+            h_A.style.color = "#00ff41";
+        }
+        if (h_B) {
+            h_B.textContent = "Hosp B: 100% O2";
+            h_B.style.color = "#00ff41";
+        }
+        resetDisasterState();
+    });
 }
 
 // ---------------------------------------------------------------------------
@@ -926,10 +980,6 @@ async function triggerManualReset() {
 }
 
 function setupUiListeners() {
-    document.getElementById("btn-audio-toggle")?.addEventListener("click", toggleAudio);
-    document.getElementById("btn-trigger-sos")?.addEventListener("click", triggerManualGasLeak);
-    document.getElementById("btn-reset-disaster")?.addEventListener("click", triggerManualReset);
-
     // Layer toggles
     document.getElementById("toggle-mesh-links")?.addEventListener("change", (e) => {
         if (e.target.checked) state.map.addLayer(state.layers.links);
