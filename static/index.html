@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project RESONANCE | Disaster Response Mission Control</title>
+    <title>Project RESONANCE | Disaster Response Mission Control (Bengaluru Grid)</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,7 +27,7 @@
                 </div>
                 <div class="brand-text">
                     <h1 class="brand-title">RESONANCE</h1>
-                    <span class="brand-subtitle">DISASTER RESPONSE TACTICAL MESH OS</span>
+                    <span class="brand-subtitle">DISASTER RESPONSE TACTICAL MESH OS // BENGALURU GRID</span>
                 </div>
             </div>
 
@@ -43,7 +43,7 @@
                 </div>
                 <div class="stat-pill" title="Active Transceivers In Mesh">
                     <span class="stat-label">NODES</span>
-                    <span class="stat-value highlight-green" id="hud-node-count">0/0</span>
+                    <span class="stat-value highlight-green" id="hud-node-count">8/8</span>
                 </div>
                 <div class="stat-pill" title="High Priority Emergencies">
                     <span class="stat-label">ALERTS</span>
@@ -70,9 +70,13 @@
                         <span class="btn-icon" id="audio-icon">🔇</span>
                         <span class="btn-label">AUDIO</span>
                     </button>
-                    <button class="hud-btn" id="btn-trigger-sos" title="Simulate Quick SOS Event">
+                    <button class="hud-btn btn-danger-glow" id="btn-trigger-sos" title="Simulate Critical Gas Leak on Node #3">
                         <span class="btn-icon">⚡</span>
-                        <span class="btn-label">SIM SOS</span>
+                        <span class="btn-label">TRIGGER GAS LEAK</span>
+                    </button>
+                    <button class="hud-btn" id="btn-reset-disaster" title="Reset Disaster State & Clear Route">
+                        <span class="btn-icon">🔄</span>
+                        <span class="btn-label">RESET ROUTE</span>
                     </button>
                 </div>
             </div>
@@ -87,8 +91,8 @@
                 <!-- Tactical Map HUD Overlays -->
                 <div class="map-hud-overlay top-left">
                     <div class="overlay-box glass-panel">
-                        <div class="box-title">TACTICAL GRID // SF DISASTER SECTOR</div>
-                        <div class="grid-coords" id="crosshair-coords">LAT: 37.7749° N | LON: -122.4194° W</div>
+                        <div class="box-title">TACTICAL GRID // BENGALURU SECTOR MATRIX</div>
+                        <div class="grid-coords" id="crosshair-coords">LAT: 12.9520° N | LON: 77.6320° E</div>
                     </div>
                 </div>
 
@@ -98,17 +102,17 @@
                         <label class="layer-toggle-item">
                             <input type="checkbox" id="toggle-mesh-links" checked>
                             <span class="checkbox-custom"></span>
-                            <span class="layer-name">Mesh Topology Links</span>
+                            <span class="layer-name">LoRa Mesh Topology Links</span>
                         </label>
                         <label class="layer-toggle-item">
                             <input type="checkbox" id="toggle-hazard-zones" checked>
                             <span class="checkbox-custom"></span>
-                            <span class="layer-name">Hazard & Flood Zones</span>
+                            <span class="layer-name">Toxic Gas Plume Zone</span>
                         </label>
                         <label class="layer-toggle-item">
                             <input type="checkbox" id="toggle-safe-corridor" checked>
                             <span class="checkbox-custom"></span>
-                            <span class="layer-name">Evac Corridors</span>
+                            <span class="layer-name">AI Convoy / Detour Routes</span>
                         </label>
                     </div>
                 </div>
@@ -117,13 +121,15 @@
                     <div class="overlay-box glass-panel quick-node-selector">
                         <span class="selector-label">JUMP TO NODE:</span>
                         <div class="node-quick-tags" id="quick-node-tags">
-                            <button class="tag-btn" onclick="focusNode('ALPHA-1')">ALPHA-1</button>
-                            <button class="tag-btn" onclick="focusNode('BRAVO-4')">BRAVO-4</button>
-                            <button class="tag-btn" onclick="focusNode('CHARLIE-7')">CHARLIE-7</button>
-                            <button class="tag-btn" onclick="focusNode('DELTA-2')">DELTA-2</button>
-                            <button class="tag-btn" onclick="focusNode('ECHO-9')">ECHO-9</button>
-                            <button class="tag-btn" onclick="focusNode('FOXTROT-3')">FOXTROT-3</button>
-                            <button class="tag-btn" onclick="resetMapView()">RESET</button>
+                            <button class="tag-btn" onclick="focusNode('ALPHA-1')">ALPHA-1 (MG Rd)</button>
+                            <button class="tag-btn" onclick="focusNode('BRAVO-4')">BRAVO-4 (Indiranagar)</button>
+                            <button class="tag-btn tag-danger" onclick="focusNode('CHARLIE-7')">CHARLIE-7 (Domlur #3)</button>
+                            <button class="tag-btn" onclick="focusNode('DELTA-2')">DELTA-2 (Koramangala)</button>
+                            <button class="tag-btn" onclick="focusNode('ECHO-9')">ECHO-9 (HSR Hub)</button>
+                            <button class="tag-btn" onclick="focusNode('FOXTROT-3')">FOXTROT-3 (Marathahalli)</button>
+                            <button class="tag-btn" onclick="focusNode('SIERRA-8')">SIERRA-8 (Silk Board)</button>
+                            <button class="tag-btn" onclick="focusNode('RELAY-01')">RELAY-01 (Vidhana)</button>
+                            <button class="tag-btn" onclick="resetMapView()">RESET VIEW</button>
                         </div>
                     </div>
                 </div>
@@ -133,7 +139,7 @@
                     <div class="banner-content">
                         <span class="banner-alert-icon">⚠️</span>
                         <div class="banner-text">
-                            <strong id="banner-title">CRITICAL SOS DETECTED</strong>
+                            <strong id="banner-title">CRITICAL HAZARD DETECTED</strong>
                             <p id="banner-desc">Emergency distress packet intercepted on mesh channel</p>
                         </div>
                         <button class="banner-dismiss" onclick="dismissEmergencyBanner()">ACKNOWLEDGE</button>
@@ -150,7 +156,7 @@
                             <span class="tab-icon">📡</span> LIVE TELEMETRY
                         </button>
                         <button class="tab-btn" id="tab-btn-fleet" onclick="switchSidebarTab('fleet')">
-                            <span class="tab-icon">👥</span> NODE FLEET (<span id="fleet-count">0</span>)
+                            <span class="tab-icon">👥</span> NODE FLEET (<span id="fleet-count">8</span>)
                         </button>
                     </div>
 
@@ -210,12 +216,12 @@
                 <!-- Sidebar Footer Status Bar -->
                 <div class="sidebar-footer">
                     <div class="footer-stat">
-                        <span class="label">RATE:</span>
-                        <span class="value" id="packet-rate-indicator">0.5 pkts/sec</span>
+                        <span class="label">GRID:</span>
+                        <span class="value highlight-cyan">BLR-CENTRAL</span>
                     </div>
                     <div class="footer-stat">
-                        <span class="label">MESH HOPS:</span>
-                        <span class="value highlight-cyan">AUTO-RELAY</span>
+                        <span class="label">AI ROUTING:</span>
+                        <span class="value highlight-green">A* DYNAMIC</span>
                     </div>
                     <div class="footer-stat">
                         <span class="label">ENCRYPTION:</span>

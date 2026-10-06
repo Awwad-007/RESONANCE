@@ -1,6 +1,7 @@
 """
 Project RESONANCE - Mesh Network Hardware Telemetry Simulator
-Generates 16-byte hex packets mimicking LoRa/mesh field hardware and sends them to the FastAPI server.
+Bengaluru Tactical Mesh Grid & Disaster Trigger Simulator
+Simulates 8 LoRa field transceivers across Bengaluru with an automated toxic gas leak trigger on Node #3.
 """
 
 import argparse
@@ -9,6 +10,7 @@ import math
 import random
 import struct
 import sys
+import threading
 import time
 from typing import Dict, List, Optional
 
@@ -19,6 +21,7 @@ import requests
 # ---------------------------------------------------------------------------
 DEFAULT_ENDPOINT = "http://127.0.0.1:8000/api/telemetry"
 DEFAULT_INTERVAL_SEC = 2.0
+TRIGGER_PACKET_COUNT = 6  # Triggers gas leak on packet #6 (~12s after launch)
 
 # 16-Byte Binary Format:
 #   >HBBiibbBB -> NodeID(2B), MsgType(1B), Battery(1B), Lat(4B), Lon(4B), RSSI(1B), SNR(1B), Hops(1B), Seq(1B)
@@ -36,128 +39,153 @@ DIM = "\033[2m"
 RESET = "\033[0m"
 
 # ---------------------------------------------------------------------------
-# Simulated Mesh Field Nodes
+# Simulated Bengaluru Mesh Field Nodes (8 Major Intersections)
 # ---------------------------------------------------------------------------
-NODES_CONFIG = [
+BENGALURU_NODES_CONFIG = [
     {
+        "index": 1,
         "node_id": 0xA101,
         "callsign": "ALPHA-1",
-        "role": "Search & Rescue Lead",
-        "base_lat": 37.7885,
-        "base_lon": -122.4015,
+        "role": "SAR Lead (MG Road / Trinity)",
+        "base_lat": 12.9733,
+        "base_lon": 77.6186,
         "is_mobile": True,
-        "battery": 88,
-        "preferred_types": [1, 2, 5],  # SOS, Medical, Beacon
-        "notes": [
-            "SAR Unit Alpha deployed inside Sector 4 rubble",
-            "Thermal scanner detected 2 survivors in basement",
-            "Heavy debris blocking secondary exit corridor",
-            "Extraction route secured via North stairwell",
-        ],
-    },
-    {
-        "node_id": 0xB204,
-        "callsign": "BRAVO-4",
-        "role": "Medical Field Triage",
-        "base_lat": 37.7785,
-        "base_lon": -122.4178,
-        "is_mobile": False,
-        "battery": 94,
-        "preferred_types": [2, 4, 5],  # Medical, Resources, Beacon
-        "notes": [
-            "Triage Alpha: 14 patients treated, 3 critical",
-            "Urgent request: O-negative blood & trauma kits",
-            "Field generator operating at 100% capacity",
-            "Med-Evac landing zone designated and clear",
-        ],
-    },
-    {
-        "node_id": 0xC307,
-        "callsign": "CHARLIE-7",
-        "role": "Structural Seismic Sensor",
-        "base_lat": 37.7940,
-        "base_lon": -122.3960,
-        "is_mobile": False,
-        "battery": 76,
-        "preferred_types": [3, 5],  # Hazard, Beacon
-        "notes": [
-            "Micro-tremor amplitude 2.8 recorded at Pier support",
-            "Structural resonance vibration within safety envelope",
-            "Crack displacement sensor delta: +1.4mm",
-            "Tilt sensor nominal at 0.04 deg offset",
-        ],
-    },
-    {
-        "node_id": 0xD402,
-        "callsign": "DELTA-2",
-        "role": "Airborne Recon Drone",
-        "base_lat": 37.7820,
-        "base_lon": -122.4100,
-        "is_mobile": True,
-        "battery": 62,
-        "preferred_types": [3, 4, 5],  # Hazard, Status, Beacon
-        "notes": [
-            "Aerial FLIR survey of Sector 2 perimeter complete",
-            "Access road 101 clear for emergency vehicles",
-            "Identified unmapped structural fire at warehouse 7",
-            "Mesh relay link active at altitude 120m AGL",
-        ],
-    },
-    {
-        "node_id": 0xE509,
-        "callsign": "ECHO-9",
-        "role": "Civilian Evacuation Shelter",
-        "base_lat": 37.7840,
-        "base_lon": -122.4010,
-        "is_mobile": False,
-        "battery": 99,
-        "preferred_types": [4, 5],  # Resources, Beacon
-        "notes": [
-            "Moscone Shelter census: 284 registered civilians",
-            "Potable water reserves at 4,200 liters",
-            "Satellite emergency internet uplink active",
-            "Distribution of emergency ration kits underway",
-        ],
-    },
-    {
-        "node_id": 0xF603,
-        "callsign": "FOXTROT-3",
-        "role": "Hydrological Flood Monitor",
-        "base_lat": 37.7980,
-        "base_lon": -122.3920,
-        "is_mobile": False,
-        "battery": 82,
-        "preferred_types": [3, 5],  # Hazard, Beacon
-        "notes": [
-            "Water level sensor: +0.65m surge above baseline",
-            "Storm drain flow velocity exceeding 3.2 m/s",
-            "Pumping station 4 operating at full capacity",
-            "Embarcadero roadway surface water pooling detected",
-        ],
-    },
-    {
-        "node_id": 0x0001,
-        "callsign": "RELAY-01",
-        "role": "Twin Peaks High-Gain Gateway",
-        "base_lat": 37.7544,
-        "base_lon": -122.4477,
-        "is_mobile": False,
-        "battery": 100,
+        "battery": 92,
         "preferred_types": [5, 4],  # Beacon, Status
         "notes": [
-            "Master LoRa mesh gateway repeater online",
-            "Connected nodes in range: 6 field transceivers",
-            "Radio channel 915.0 MHz noise floor: -118 dBm",
-            "Backhaul fiber connection operational",
+            "SAR Unit Alpha deployed at MG Road metro interchange",
+            "Emergency vehicle transit lane established",
+            "Grid power stable across Sector 1 corridor",
+            "Thermal recon sweep: zero civilian distress detected",
+        ],
+    },
+    {
+        "index": 2,
+        "node_id": 0xB204,
+        "callsign": "BRAVO-4",
+        "role": "Medical Triage (Indiranagar)",
+        "base_lat": 12.9784,
+        "base_lon": 77.6408,
+        "is_mobile": False,
+        "battery": 88,
+        "preferred_types": [5, 2],  # Beacon, Medical
+        "notes": [
+            "Indiranagar 100ft Field Hospital operational",
+            "Triage units prepared for emergency surge",
+            "Rapid response ambulance convoy on standby",
+            "Medical oxygen & critical supply levels optimal",
+        ],
+    },
+    {
+        "index": 3,
+        "node_id": 0xC307,
+        "callsign": "CHARLIE-7",
+        "role": "Toxic Gas & Env Sensor (Domlur Flyover)",
+        "base_lat": 12.9609,
+        "base_lon": 77.6387,
+        "is_mobile": False,
+        "battery": 84,
+        "preferred_types": [5],  # Normal beacon -> switches to CRITICAL HAZARD on trigger
+        "notes": [
+            "Atmospheric particulate baseline nominal (AQI 42)",
+            "Methane / H2S optical spectrometry sensor calibrated",
+            "Domlur intersection traffic flow telemetry linked",
+            "Air sample flow rate: 2.4 L/min standard",
+        ],
+    },
+    {
+        "index": 4,
+        "node_id": 0xD402,
+        "callsign": "DELTA-2",
+        "role": "Recon Drone UAV (Koramangala)",
+        "base_lat": 12.9352,
+        "base_lon": 77.6245,
+        "is_mobile": True,
+        "battery": 68,
+        "preferred_types": [5, 4],  # Beacon, Status
+        "notes": [
+            "UAV altitude 150m AGL - Sony World junction orbit",
+            "FLIR infrared sensor scanning transit corridors",
+            "Optical telemetry feed synced to mesh repeater",
+            "Aerial wind vector: 4.2 km/h North-East",
+        ],
+    },
+    {
+        "index": 5,
+        "node_id": 0xE509,
+        "callsign": "ECHO-9",
+        "role": "Civilian Evac Hub (HSR Layout)",
+        "base_lat": 12.9116,
+        "base_lon": 77.6389,
+        "is_mobile": False,
+        "battery": 97,
+        "preferred_types": [5, 4],  # Beacon, Status
+        "notes": [
+            "HSR Layout Evac Shelter Base online (Capacity: 500)",
+            "Emergency potable water supply: 8,500 L",
+            "Satellite emergency data downlink verified",
+            "Civilian check-in portal active on local Wi-Fi mesh",
+        ],
+    },
+    {
+        "index": 6,
+        "node_id": 0xF603,
+        "callsign": "FOXTROT-3",
+        "role": "Perimeter Beacon (Marathahalli ORR)",
+        "base_lat": 12.9562,
+        "base_lon": 77.7019,
+        "is_mobile": False,
+        "battery": 79,
+        "preferred_types": [5],  # Beacon
+        "notes": [
+            "Outer Ring Road perimeter link synchronized",
+            "Secondary repeater hops routed through HAL sector",
+            "Radio channel noise floor: -116 dBm",
+            "Perimeter access checkpoint operational",
+        ],
+    },
+    {
+        "index": 7,
+        "node_id": 0x0001,
+        "callsign": "RELAY-01",
+        "role": "Master Gateway (Vidhana Soudha)",
+        "base_lat": 12.9797,
+        "base_lon": 77.5907,
+        "is_mobile": False,
+        "battery": 100,
+        "preferred_types": [5],  # Beacon
+        "notes": [
+            "Central Command High-Gain LoRa Gateway active",
+            "Full-mesh packet routing tables synchronized",
+            "Fiber backhaul uplink bandwidth nominal",
+            "Master clock sync pulse broadcasted (UTC)",
+        ],
+    },
+    {
+        "index": 8,
+        "node_id": 0x0808,
+        "callsign": "SIERRA-8",
+        "role": "Logistics Relay (Silk Board Junction)",
+        "base_lat": 12.9177,
+        "base_lon": 77.6238,
+        "is_mobile": False,
+        "battery": 91,
+        "preferred_types": [5, 4],  # Beacon, Status
+        "notes": [
+            "Silk Board central transit junction link active",
+            "Heavy transport emergency corridor clear",
+            "RF repeater coverage verified across Hosur Road",
+            "Auxiliary solar battery charging active",
         ],
     },
 ]
 
 
-class MeshNodeSimulator:
-    """Simulates an individual LoRa field node with dynamic state."""
+class BengaluruMeshNode:
+    """Simulates an individual LoRa mesh node in Bengaluru."""
 
     def __init__(self, config: dict):
+        self.index: int = config["index"]
         self.node_id: int = config["node_id"]
         self.callsign: str = config["callsign"]
         self.role: str = config["role"]
@@ -171,46 +199,48 @@ class MeshNodeSimulator:
         self.notes: List[str] = config["notes"]
         self.seq_num: int = random.randint(0, 50)
         self.orbit_angle: float = random.uniform(0, 2 * math.pi)
+        self.is_hazardous: bool = False
 
-    def step(self) -> tuple[bytes, str, str]:
+    def step(self, force_hazard: bool = False) -> tuple[bytes, str, str, int]:
         """
-        Advances the node simulation state and packs a 16-byte binary payload.
-        Returns: (raw_bytes, hex_string, note_description)
+        Advances the simulation and packs a 16-byte binary payload.
+        Returns: (raw_bytes, hex_string, note, msg_type)
         """
         self.seq_num = (self.seq_num + 1) % 256
 
-        # Slowly degrade battery
-        if random.random() < 0.15 and self.battery > 5:
+        # Slow battery degrade
+        if random.random() < 0.1 and self.battery > 5:
             self.battery -= 1
 
         # Mobile nodes wander slightly
         if self.is_mobile:
-            self.orbit_angle += 0.12
-            radius = 0.0035  # ~350 meters radius
+            self.orbit_angle += 0.15
+            radius = 0.0025  # ~250m radius
             self.lat = self.base_lat + (math.sin(self.orbit_angle) * radius)
             self.lon = self.base_lon + (math.cos(self.orbit_angle) * radius * 1.2)
         else:
-            # Stationary nodes experience tiny GPS jitter (±5 meters)
-            self.lat = self.base_lat + random.uniform(-0.00005, 0.00005)
-            self.lon = self.base_lon + random.uniform(-0.00005, 0.00005)
+            self.lat = self.base_lat + random.uniform(-0.00004, 0.00004)
+            self.lon = self.base_lon + random.uniform(-0.00004, 0.00004)
 
-        # Pick message type
-        msg_type = random.choice(self.preferred_types)
+        # Handle Hazard State for Node #3
+        if force_hazard or self.is_hazardous:
+            self.is_hazardous = True
+            msg_type = 3  # HAZARD_ALERT
+            note = "CRITICAL TOXIC GAS LEAK DETECTED (METHANE/H2S > 850 PPM) AT DOMLUR INTERSECTION - IMMEDIATE EVACUATION ORDER"
+            rssi = -64
+            snr = 11
+        else:
+            msg_type = random.choice(self.preferred_types)
+            note = random.choice(self.notes)
+            rssi = int(random.gauss(-76, 10))
+            rssi = max(-120, min(-45, rssi))
+            snr = int(random.gauss(7, 3))
+            snr = max(-15, min(14, snr))
 
-        # Scale coordinates to signed 32-bit integers
         lat_scaled = int(round(self.lat * 1_000_000))
         lon_scaled = int(round(self.lon * 1_000_000))
+        hops = random.randint(1, 2)
 
-        # Radio metrics
-        rssi = int(random.gauss(-78, 12))
-        rssi = max(-120, min(-45, rssi))
-
-        snr = int(random.gauss(6, 4))
-        snr = max(-15, min(14, snr))
-
-        hops = random.randint(1, 3)
-
-        # 16-byte binary pack
         raw_bytes = struct.pack(
             PACKET_STRUCT_FORMAT,
             self.node_id,
@@ -225,77 +255,109 @@ class MeshNodeSimulator:
         )
 
         hex_payload = raw_bytes.hex()
-        note = random.choice(self.notes)
-
-        return raw_bytes, hex_payload, note
+        return raw_bytes, hex_payload, note, msg_type
 
 
 # ---------------------------------------------------------------------------
 # Main Simulation Loop
 # ---------------------------------------------------------------------------
-def run_simulation(endpoint: str, interval: float, burst_mode: bool = False):
-    """Runs the continuous telemetry transmission loop."""
-    nodes = [MeshNodeSimulator(cfg) for cfg in NODES_CONFIG]
+def run_simulation(endpoint: str, interval: float, auto_trigger_count: int, immediate_hazard: bool = False):
+    """Runs the continuous telemetry transmission loop with automated disaster trigger."""
+    nodes = [BengaluruMeshNode(cfg) for cfg in BENGALURU_NODES_CONFIG]
+    node_map = {n.callsign: n for n in nodes}
 
-    print(f"\n{BOLD}{CYAN}╔══════════════════════════════════════════════════════════════════╗{RESET}")
-    print(f"{BOLD}{CYAN}║     PROJECT RESONANCE - HARDWARE MESH SIMULATOR (LoRa 433MHz)    ║{RESET}")
-    print(f"{BOLD}{CYAN}╚══════════════════════════════════════════════════════════════════╝{RESET}")
-    print(f"{DIM} Target Ingest Endpoint : {endpoint}{RESET}")
-    print(f"{DIM} Transmission Interval  : {interval:.1f}s | Nodes Active: {len(nodes)}{RESET}")
-    print(f"{DIM} Payload Size           : 16 Bytes (32 Hex Chars){RESET}\n")
+    print(f"\n{BOLD}{GREEN}╔══════════════════════════════════════════════════════════════════════════╗{RESET}")
+    print(f"{BOLD}{GREEN}║    PROJECT RESONANCE - BENGALURU TACTICAL MESH SIMULATOR (8 NODES)       ║{RESET}")
+    print(f"{BOLD}{GREEN}╚══════════════════════════════════════════════════════════════════════════╝{RESET}")
+    print(f"{DIM} Ingest Endpoint        : {endpoint}{RESET}")
+    print(f"{DIM} Transmission Interval  : {interval:.1f}s | Active Nodes: {len(nodes)}{RESET}")
+    print(f"{DIM} Gas Leak Trigger       : After Packet #{auto_trigger_count} (~{auto_trigger_count * interval:.0f}s) on Node #3 (CHARLIE-7 @ Domlur){RESET}")
+    print(f"{DIM} Manual Trigger Key     : Press [ENTER] at any time to instantly trigger Gas Leak{RESET}\n")
+
+    hazard_active = immediate_hazard
+    if immediate_hazard:
+        node_map["CHARLIE-7"].is_hazardous = True
+
+    # Background thread to listen for manual ENTER key to trigger disaster
+    def manual_trigger_listener():
+        nonlocal hazard_active
+        while True:
+            try:
+                line = sys.stdin.readline()
+                if not hazard_active:
+                    hazard_active = True
+                    node_map["CHARLIE-7"].is_hazardous = True
+                    print(f"\n{BOLD}{RED}🚨 [MANUAL TRIGGER] Gas leak initiated by operator on Node #3 (CHARLIE-7)!{RESET}\n")
+            except Exception:
+                break
+
+    input_thread = threading.Thread(target=manual_trigger_listener, daemon=True)
+    input_thread.start()
 
     packet_count = 0
     node_index = 0
 
     try:
         while True:
-            # Round-robin selection of field nodes or random transmission
+            # Pick node in round-robin order
             node = nodes[node_index % len(nodes)]
             node_index += 1
-
-            raw_bytes, hex_payload, note = node.step()
             packet_count += 1
 
-            # Format byte groups for terminal output: e.g. "A1 01 01 55 02 40 ..."
+            # Auto-trigger gas leak when packet threshold reached
+            if packet_count == auto_trigger_count and not hazard_active:
+                hazard_active = True
+                node_map["CHARLIE-7"].is_hazardous = True
+                print(f"\n{BOLD}{RED}╔══════════════════════════════════════════════════════════════════════════╗{RESET}")
+                print(f"{BOLD}{RED}║  🚨 [DISASTER TRIGGERED] NODE #3 (CHARLIE-7 @ DOMLUR) DETECTED GAS LEAK  ║{RESET}")
+                print(f"{BOLD}{RED}║  Broadcasting Toxic Plume Telemetry & Engaging AI A* Dynamic Detour...   ║{RESET}")
+                print(f"{BOLD}{RED}╚══════════════════════════════════════════════════════════════════════════╝{RESET}\n")
+                # Immediately transmit Node #3's packet
+                node = node_map["CHARLIE-7"]
+
+            # Step node
+            raw_bytes, hex_payload, note, msg_type = node.step()
+
             byte_groups = " ".join([hex_payload[i : i + 2].upper() for i in range(0, len(hex_payload), 2)])
 
             payload_data = {
                 "hex_payload": hex_payload,
                 "note": note,
-                "gateway_id": "GW-CENTRAL-01",
+                "gateway_id": "GW-BENGALURU-CENTRAL",
             }
 
             send_start = time.time()
             try:
                 response = requests.post(endpoint, json=payload_data, timeout=3.0)
                 latency_ms = int((time.time() - send_start) * 1000)
-
                 if response.status_code == 200:
                     status_badge = f"{GREEN}[200 OK - {latency_ms}ms]{RESET}"
                 else:
                     status_badge = f"{RED}[{response.status_code} ERR]{RESET}"
             except requests.exceptions.ConnectionError:
-                status_badge = f"{RED}[CONN REFUSED - Backend not running?]{RESET}"
+                status_badge = f"{RED}[CONN REFUSED - Start main.py first]{RESET}"
             except Exception as e:
                 status_badge = f"{RED}[ERR: {e}]{RESET}"
 
-            # Styled console log
+            # Format log line
             ts = datetime.datetime.now().strftime("%H:%M:%S")
+            node_color = RED if (node.callsign == "CHARLIE-7" and hazard_active) else CYAN
+            type_tag = f"{RED}[GAS HAZARD]{RESET}" if (node.callsign == "CHARLIE-7" and hazard_active) else f"{GREEN}[BEACON]{RESET}"
+
             print(
                 f"{DIM}{ts}{RESET} "
                 f"{BOLD}{BLUE}#{packet_count:04d}{RESET} "
-                f"{BOLD}{MAGENTA}[{node.callsign:^8}]{RESET} "
+                f"{BOLD}{node_color}[{node.callsign:^9}]{RESET} "
+                f"{type_tag} "
                 f"{YELLOW}{byte_groups}{RESET} "
                 f"{status_badge}"
             )
-            print(f"  {DIM}└─ Pos: ({node.lat:.4f}, {node.lon:.4f}) | Bat: {node.battery}% | Note: {note}{RESET}")
+            print(f"  {DIM}└─ Pos: ({node.lat:.4f}, {node.lon:.4f}) | Bat: {node.battery}% | {note}{RESET}")
 
-            # Wait for next transmission interval
-            sleep_time = interval if not burst_mode else random.uniform(0.5, 1.5)
-            time.sleep(sleep_time)
+            time.sleep(interval)
 
     except KeyboardInterrupt:
-        print(f"\n{YELLOW}[!] Simulator halted by operator. Total packets generated: {packet_count}{RESET}\n")
+        print(f"\n{YELLOW}[!] Simulator terminated by operator. Total frames sent: {packet_count}{RESET}\n")
         sys.exit(0)
 
 
@@ -303,7 +365,7 @@ def run_simulation(endpoint: str, interval: float, burst_mode: bool = False):
 # CLI Argument Parser
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Project RESONANCE Hardware Mesh Packet Simulator")
+    parser = argparse.ArgumentParser(description="Project RESONANCE Bengaluru Mesh Network Hardware Simulator")
     parser.add_argument(
         "--endpoint",
         type=str,
@@ -317,10 +379,21 @@ if __name__ == "__main__":
         help=f"Transmission interval in seconds (default: {DEFAULT_INTERVAL_SEC}s)",
     )
     parser.add_argument(
-        "--burst",
+        "--trigger-count",
+        type=int,
+        default=TRIGGER_PACKET_COUNT,
+        help=f"Packet count at which Node #3 triggers gas leak (default: {TRIGGER_PACKET_COUNT})",
+    )
+    parser.add_argument(
+        "--hazard-now",
         action="store_true",
-        help="Enable rapid random burst mode for load testing",
+        help="Start with gas leak hazard immediately active",
     )
     args = parser.parse_args()
 
-    run_simulation(endpoint=args.endpoint, interval=args.interval, burst_mode=args.burst)
+    run_simulation(
+        endpoint=args.endpoint,
+        interval=args.interval,
+        auto_trigger_count=args.trigger_count,
+        immediate_hazard=args.hazard_now,
+    )
